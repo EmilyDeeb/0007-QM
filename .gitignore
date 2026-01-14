@@ -205,3 +205,9 @@ cython_debug/
 marimo/_static/
 marimo/_lsp/
 __marimo__/
+.Rproj.user
+
+/Finale Assesment/data*
+/Finale Assesment/shp*
+/Finale Assesment/rosm.cache*
+/Finale Aseesment/QM_Code_files*
