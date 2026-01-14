@@ -1,0 +1,499 @@
+---
+title: "WK06_Practical"
+output: html_document
+date: "2025-11-18"
+---
+
+Questions to Answer:
+After visualising the relationships using scatter plots, do you think you need to transform your variables (e.g. using a log transformation) before putting into a regression model? Maybe plot scatter plots of your logged variables too!
+What are the slope and intercept coefficients in each model? Are they statistically significant and how do vary between your two subsets? How do they compare with the national picture?
+How do the R-squared values differ and how reliable do you think they are (what do the degrees of freedom tell you)?
+What observations can you make about your two local authority study areas relative to the national picture?
+
+### Task 1 - Download your data and read into your software environment
+
+```{r}
+library(tidyverse)
+library(janitor)
+library(readr)
+library(dplyr)
+library(here)
+
+# Read CSV file
+edubase_schools <- read_csv(
+  "https://www.dropbox.com/scl/fi/fhzafgt27v30lmmuo084y/edubasealldata20241003.csv?rlkey=uorw43s44hnw5k9js3z0ksuuq&raw=1",
+  col_types = cols(
+    Easting = col_character(),
+    Northing = col_character()
+  )
+) %>% 
+  clean_names() %>% 
+  mutate(
+    easting = as.numeric(easting),
+    northing = as.numeric(northing),
+    urn = as.character(urn)
+  )
+
+#str(r_edubase_schools)
+
+# Define base path and common NA values - NOTE YOU WILL NEED TO DOWNLOAD THIS DATA AND PUT INTO YOUR OWN base_path LOCATION ON YOUR MACHINE
+base_path <- here("england_school_2022_23", "2022-2023")
+na_common <- c("", "NA", "SUPP", "NP", "NE")
+na_extended <- c(na_common, "SP", "SN")
+na_attainment <- c(na_extended, "LOWCOV", "NEW")
+na_mats <- c(na_common, "SUPPMAT")
+na_all <- c("", "NA", "SUPP", "NP", "NE", "SP", "SN", "LOWCOV", "NEW", "SUPPMAT")
+
+# Absence data
+england_abs <- read_csv(file.path(base_path, "england_abs.csv"), na = na_all) |>
+  mutate(URN = as.character(URN))
+
+# Other School Census data
+england_census <- read_csv(file.path(base_path, "england_census.csv"), na = na_all) |>
+  mutate(URN = as.character(URN)) |>
+  mutate(across(5:23, ~ parse_number(as.character(.))))
+
+# KS4 MATs performance data
+#First read
+england_ks4_mats_performance <- read_csv(
+  file.path(base_path, "england_ks4-mats-performance.csv"),
+  na = na_all
+) |>
+  mutate(
+    TRUST_UID = as.character(TRUST_UID),
+    P8_BANDING = as.character(P8_BANDING),
+    INSTITUTIONS_INMAT = as.character(INSTITUTIONS_INMAT)
+  )
+
+# Then Identify columns to convert (excluding character columns)
+cols_to_convert <- england_ks4_mats_performance |>
+  select(-(1:10), -P8_BANDING, -INSTITUTIONS_INMAT) |>
+  names()
+
+# Then apply parse_number safely to convert characters to numbers
+england_ks4_mats_performance <- england_ks4_mats_performance |>
+  mutate(across(all_of(cols_to_convert), ~ parse_number(as.character(.))))
+
+
+# KS4 pupil destination data
+england_ks4_pupdest <- read_csv(file.path(base_path, "england_ks4-pupdest.csv"), na = na_all) |>
+  mutate(URN = as.character(URN)) |>
+  mutate(across(8:82, ~ parse_number(as.character(.))))
+
+# KS4 final attainment data
+england_ks4final <- read_csv(file.path(base_path, "england_ks4final.csv"), na = na_all) |>
+  mutate(URN = as.character(URN)) |>
+  mutate(across(TOTPUPS:PTOTENT_E_COVID_IMPACTED_PTQ_EE, ~ parse_number(as.character(.))))
+
+# School information data
+england_school_information <- read_csv(
+  file.path(base_path, "england_school_information.csv"),
+  na = na_all,
+  col_types = cols(
+    URN = col_character(),
+    OFSTEDLASTINSP = col_date(format = "%d-%m-%Y")
+  )
+)
+```
+
+### Task 2 - Data Munging
+```{r}
+# Left join england_ks4final with england_abs
+england_school_2022_23 <- england_ks4final %>%
+  left_join(england_abs, by = "URN") %>%
+  left_join(england_census, by = "URN") %>%
+  left_join(england_school_information, by = "URN") %>%
+  left_join(edubase_schools, by = c("URN" = "urn"))
+```
+
+Iterative Checking and initial exploratory analysis
+
+```{r}
+median_value <- median(england_school_2022_23$ATT8SCR, na.rm = TRUE)
+mean_value   <- mean(england_school_2022_23$ATT8SCR, na.rm = TRUE)
+sd_value   <- sd(england_school_2022_23$ATT8SCR, na.rm = TRUE)
+
+ggplot(england_school_2022_23, aes(x = ATT8SCR)) +
+  geom_histogram(aes(y = ..density..), binwidth = 1, fill = "#4E3C56", alpha = 0.4) +
+  stat_function(fun = dnorm, args = list(mean = mean_value, sd = sd_value), color = "#2E6260", linewidth = 1) +
+  geom_vline(xintercept = median_value, color = "black", linetype = "dotted", size = 1) +
+  geom_vline(xintercept = mean_value, color = "#F9DD73", linetype = "solid", size = 1) +
+  annotate("text",
+           x = median_value, y = Inf,
+           label = paste0("Median = ", round(median_value, 1)),
+           vjust = 1.3, color = "black", size = 3.5) +
+  annotate("text",
+           x = mean_value, y = Inf,
+           label = paste0("Mean = ", round(mean_value, 1)),
+           vjust = 30.5, color = "#F9DD73", size = 3.5) +
+  scale_y_continuous(expand = expansion(mult = c(0, 0.08))) +
+  labs(
+    title = "Attainment 8 - All Schools England and Wales, 2022/23 Academic Year",
+    x = "Attainment 8 Score",
+    y = "Density"
+  ) +
+  theme_minimal()
+```
+
+```{r}
+ggplot(england_school_2022_23, aes(x = ATT8SCR, y = "")) +
+  geom_boxplot(fill = "#EDD971", alpha = 0.3, outlier.shape = NA) +    
+  geom_jitter(aes(colour = MINORGROUP), height = 0.2, alpha = 0.3, size = 1) + 
+  scale_colour_viridis_d(option = "turbo") +  # applies the default casaviz discrete palette
+  labs(
+    title = "Attainment 8 - All Schools 2022/23 Academic Year",
+    x = "Attainment 8 Score",
+    y = NULL,
+    colour = "School Type"
+  ) +
+  theme_minimal() +
+  theme(
+    legend.position = "bottom",
+    legend.key.size = unit(10, "mm"),   # increase dot space
+    legend.text = element_text(size = 10)  # optional: larger legend labels
+  ) + guides(colour = guide_legend(override.aes = list(size = 4)))
+```
+
+Further filtering and subsetting
+
+```{r}
+library(tidyverse)
+
+# Filter data
+england_filtered <- england_school_2022_23 %>%
+  filter(!MINORGROUP %in% c("Special school", "Independent school", "College", NA)) %>%   filter(phase_of_education_name == "Secondary") %>% 
+  filter(establishment_status_name == "Open") %>% 
+  select(URN, SCHNAME.x, TOWN.x, TOTPUPS, ATT8SCR, OFSTEDRATING, MINORGROUP, PTFSM6CLA1A, LEA, LANAME, ATT8SCRENG, ATT8SCRMAT, ATT8SCR_FSM6CLA1A, ATT8SCR_FSM6CLA1A, ATT8SCR_BOYS, ATT8SCR_GIRLS, P8MEA, P8MEA_FSM6CLA1A, P8MEA_NFSM6CLA1A, PTFSM6CLA1A, PTNOTFSM6CLA1A, PNUMEAL, PNUMENGFL, PTPRIORLO, PTPRIORHI, NORB, NORG, PNUMFSMEVER, PERCTOT, PPERSABS10, SCHOOLTYPE.x, RELCHAR, ADMPOL.y, ADMPOL_PT, gor_name, gender_name, northing, easting)
+
+write_csv(england_filtered, "england_filtered.csv")
+
+```
+
+Task 3 - Further Exploratory Analysis and Visual Modelling
+
+Just from looking at your plots: - How do you expect the intercepts (baseline Y) to differ between your London and non-London local authority (if at all)? Which is higher and which is lower? - How do you think the slope values (influence of X on Y) are different (if at all)?
+
+```{r}
+library(ggplot2)
+library(dplyr)
+
+# Combine the datasets and label them
+combined_data <- bind_rows(
+  england_filtered %>% mutate(LANAME = "London"),
+  england_filtered %>% mutate(LANAME = "Birmngham")
+)
+
+# Create faceted scatter plot
+ggplot(combined_data, aes(x = PTFSM6CLA1A, y = ATT8SCR)) +
+  geom_point(alpha = 0.7, size = 1, color = "Hotpink") +
+  facet_wrap(~ LANAME) +
+  labs(
+    title = "Attainment 8 vs % Disadvantaged by Local Authority",
+    x = "% KS4 Pupils Disadvantaged (PTFSM6CLA1A)",
+    y = "Attainment 8 Score (ATT8SCR)"
+  ) +
+  theme_minimal()
+```
+
+Exploratory Data Analysis Maps
+stuckhereee!
+#### Stuck
+
+```{r}
+library(sf)
+library(leaflet)
+library(dplyr)
+library(scales)
+library(viridis)
+
+combined_data %>% 
+  summarise(
+    n = n(),
+    na_easting  = sum(is.na(easting)),
+    na_northing = sum(is.na(northing))
+  )
+
+combined_data %>% 
+  filter(is.na(easting) | is.na(northing)) %>% 
+  select(URN, easting, northing) %>% 
+  head()
+
+combined_data <- combined_data %>% 
+  mutate(
+    easting  = as.numeric(easting),
+    northing = as.numeric(northing)
+  )
+
+combined_data_sf <- combined_data %>% 
+  filter(!is.na(easting), !is.na(northing)) %>%      # keep only full coords
+  st_as_sf(
+    coords = c("easting", "northing"),
+    crs = 27700,                                      # British National Grid
+    remove = FALSE                                   # keep original columns
+  )
+
+# Convert to sf object with EPSG:27700
+#sf_df <- st_as_sf(combined_data, coords = c("easting", "northing"), crs = 27700)
+
+# Transform to EPSG:4326
+sf_df <- st_transform(combined_data_sf , crs = 4326)
+
+# Extract lat/lon for leaflet
+sf_df <- sf_df %>%
+ filter(TOWN.x == "London") %>%
+  mutate(
+    lon = st_coordinates(.)[,1],
+    lat = st_coordinates(.)[,2]
+  )
+
+
+# Define size and color scales
+size_scale <- rescale(sf_df$TOTPUPS, to = c(1, 15))  # radius from 4 to 12
+
+# Create a color palette based on ATT8SCR
+pal <- colorNumeric(palette = "magma", domain = sf_df$ATT8SCR)
+
+leaflet(sf_df) %>%
+  addProviderTiles("CartoDB.Positron") %>%
+  addCircleMarkers(
+    lng = ~lon,
+    lat = ~lat,
+    radius = size_scale,
+    stroke = FALSE,
+    fillOpacity = 0.8,
+    color = ~pal(ATT8SCR),
+    popup = ~paste0(
+      "<strong>", SCHNAME.x, "</strong><br>",
+      "Pupils: ", TOTPUPS
+    )
+  ) %>%
+  addLegend(
+    "bottomright",
+    pal = pal,
+    values = ~ATT8SCR,
+    title = "ATT8SCR",
+    opacity = 0.8
+  )
+```
+
+Exploratory Data Analysis - Distributions and slicing and dicing
+
+```{r}
+library(ggside)
+library(ggplot2)
+
+ggplot(england_filtered, aes(x = log10(PTFSM6CLA1A), y = log10(ATT8SCR), colour = gor_name)) +
+  geom_point(alpha = 0.5, size = 2) +
+  geom_xsidedensity(aes(y = after_stat(density)), alpha = 0.5, size = 1, position = "stack") +
+  geom_ysidedensity(aes(x = after_stat(density)), alpha = 0.5, size = 1, position = "stack") + 
+  theme(ggside.panel.scale.x = 0.4,ggside.panel.scale.y = 0.4)
+
+```
+
+```{r}
+library(ggplot2)
+library(dplyr)
+
+# Histogram for PTFSM6CLA1A
+ggplot(england_filtered, aes(x = PTFSM6CLA1A)) +
+  geom_histogram(binwidth = 1, fill = "skyblue", color = "white", alpha = 0.5) +
+  geom_density(aes(y = ..count..), color = "skyblue", size = 1) +
+  theme_minimal() +
+  labs(
+    title = "Histogram of PTFSM6CLA1A",
+    x = "PTFSM6CLA1A",
+    y = "Frequency"
+  )
+
+```
+
+```{r}
+# Histogram for ATT8SCR
+ggplot(england_filtered, aes(x = ATT8SCR)) +
+  geom_histogram(binwidth = 1, fill = "salmon", color = "white", alpha = 0.5) +
+  geom_density(aes(y = ..count..), color = "salmon", size = 1) +
+  theme_minimal() +
+  labs(
+    title = "Histogram of ATT8SCR",
+    x = "ATT8SCR",
+    y = "Frequency"
+  )
+```
+
+```{r}
+ggplot(england_filtered, aes(x = PTFSM6CLA1A, y = ATT8SCR, fill = gor_name)) +
+  geom_violin(
+    position = position_dodge(width = 0.8),
+    alpha = 0.6,
+    draw_quantiles = c(0.25, 0.5, 0.75)
+  ) +
+  facet_wrap(~ gor_name) +
+  theme_minimal() +
+  labs(
+    title = "Violin Plot of Attainment 8 Score with Quantiles by Region",
+    x = "% Disadvantaged",
+    y = "Attainment 8 Score",
+    fill = "Region"
+  )
+```
+
+```{r}
+library(ggdist)
+
+ggplot(england_filtered, aes(x = PTFSM6CLA1A, y = gor_name, fill = gor_name)) + 
+  stat_slab(aes(thickness = after_stat(pdf*n)), scale = 0.7) +
+  stat_dotsinterval(side = "bottom", scale = 1, slab_linewidth = NA) +
+  scale_fill_brewer(palette = "Set2") +
+  theme_ggdist() +
+  labs(
+    title = "Rain Cloud Plot of % Disadvantage in Schools by Region",
+    x = "% Disadvantaged",
+    y = "Region",
+    fill = "Region"
+  )
+```
+
+Task 4 - Explanatory Analysis - Running Your Regression Model
+
+Running the Model for the first (London) local authority
+```{r}
+# Fit linear model and get predicted values
+#camden_model1 <- lm(log(ATT8SCR) ~ log(PTFSM6CLA1A), data = camden_sub)
+#summary(camden_model1)
+
+London_clean <- combined_data %>% 
+  filter(TOWN.x == "London") %>% 
+  mutate(
+    ATT8SCR = as.numeric(ATT8SCR),
+    PTFSM6CLA1A = as.numeric(PTFSM6CLA1A)
+  ) %>% 
+  # remove bad values for log()
+  filter(
+    !is.na(ATT8SCR),
+    !is.na(PTFSM6CLA1A),
+    ATT8SCR > 0,
+    PTFSM6CLA1A > 0
+  )
+
+London_model1 <- lm(
+  log(ATT8SCR) ~ log(PTFSM6CLA1A),
+  data = London_clean
+)
+
+summary(London_model1)
+
+```
+Running the Model for the second local authority
+```{r}
+# Fit linear model and get predicted values
+
+Birmingham_clean <- combined_data %>% 
+  filter(TOWN.x == "Birmingham") %>% 
+  mutate(
+    ATT8SCR = as.numeric(ATT8SCR),
+    PTFSM6CLA1A = as.numeric(PTFSM6CLA1A)
+  ) %>% 
+  # remove bad values for log()
+  filter(
+    !is.na(ATT8SCR),
+    !is.na(PTFSM6CLA1A),
+    ATT8SCR > 0,
+    PTFSM6CLA1A > 0
+  )
+
+Birmingham_model1 <- lm(
+  log(ATT8SCR) ~ log(PTFSM6CLA1A),
+  data = Birmingham_clean
+)
+
+summary(Birmingham_model1)
+
+
+```
+
+Running the Model for all Schools in England
+```{r}
+# Fit linear model and get predicted values
+england_filtered_clean <- england_filtered[
+  !is.na(england_filtered$ATT8SCR) & 
+  !is.na(england_filtered$PTFSM6CLA1A) &
+  england_filtered$ATT8SCR > 0 &
+  england_filtered$PTFSM6CLA1A > 0, 
+]
+
+england_model1 <- lm(log(ATT8SCR) ~ log(PTFSM6CLA1A), data = england_filtered_clean)
+summary(england_model1)
+```
+
+Combining your outputs for comparison
+Don’t forget to run some basic regression modelling checks on all of your models:
+
+Linearity
+```{r}
+library(performance)
+
+check_model(england_model1, 
+            check = c("linearity"))
+```
+
+Homoscedasticity (Constant variance)?
+```{r}
+check_model(england_model1, 
+            check = c("homogeneity"))
+```
+
+Normality of Residuals
+```{r}
+check_model(england_model1, 
+            check = c("qq"))
+```
+
+Influence of Outliers
+```{r}
+check_model(england_model1, 
+            check = c("outliers"))
+```
+
+Combining your outputs for comparison
+```{r}
+library(jtools)
+export_summs(London_model1, Birmingham_model1, england_model1, error_format = "", error_pos = "same", model.names = c("London Model", "Birmingham Model", "England Model"))
+```
+
+Comparing your three regression models:
+#### Do the Same for London and Birmingham####
+
+
+1. How do the intercept (baseline) attainment values differ between your three models? remember, if you (natural)logged your variables, you will need to take the exponential of the coefficient to interpret it back on the original scale.
+
+2. What do the differences in the slope values tell you?
+
+3. Are your intercept and slope values statistically significant? If so, at what level?
+
+4. How do the R-squared values differ between your models?
+
+5. What can you say about your degrees of freedom and the reliability of your R-squared and other coefficients between your models?
+
+6. What is the overall story of the relationship between your attainment variable and your explanatory variable considering both your local examples and comparison with schools across the rest of England?
+
+What does my model show?
+Baseline attainment (intercept) is much higher in Camden than in Leeds or the whole of England. Exp(6.12) = 455.32. So the Attainment 8 Score in Camden would be 455 (an impossible score) when % of disadvantaged children in a school are 0. This compares to exp(4.547) = 94.35 in Leeds and exp(4.478) = 88.06 in England as a whole. All of these intercepts are statistically significant (i.e. observed values not a chance relationship). While unrealistic (potentially due to the low degrees of freedom), the Camden intercept shows us that after controlling for disadvantage, baseline attainment in Camden is better than in Leeds or the rest of England.
+
+The slope value of -0.207 for England shows that across the country. As this is a log-log model, it is an Elasticity: A 1% increase in % of disadvantaged students in a school is associated with a 0.21% decrease in attainment. HOWEVER, as this is a log-log model, the effect is far stronger at one end of the distribution than the other.
+
+What this means is that a change from 1% to 10% of disadvantaged students in a school there is a 37.9% decrease in attainment, however, change from 21% to 30% leads to just a 7.1% decrease in attainment.
+
+
+This effect is similar for Leeds, but apparently far more severe in Camden where the slope is much steeper. However, Camden doesn’t experience very low levels of disadvantage in its schools (unlike in Leeds and the rest of the county), with the lowest level around 35%. With low numbers of schools in the Borough, this observation is potentially unreliable.
+
+The slopes and intercept coefficients in all models are all apparently statistically significant - but as we have seen with Camden, this does not necessarily mean our observations are generalisable! This is a good lesson in the difference between statistical significance (p-values are not a panacea!) and why you should always interrogate your model fully when interpreting outputs.
+
+Again, R-squared values might fool you into thinking the Camden model is ‘better’ than the other models, however, the R-squared is partially an artefact of the low degrees of freedom in the model.
+
+See above.
+
+Overall, we can make some crucial observations that encourage further research. While the model for England suggests a moderately strong log-log relationship between levels of disadvantage in a school and attainment, looking at this relationship for a London Borough (Camden) - and another Local Authority in England (Leeds) it’s the case that this is unlikely to be a universal relationship.
+
+The baseline of attainment in Camden, controlling for disadvantage, is much higher than in the rest of the country. Students get higher levels of attainment, even when controlling for disadvantage. The log log relationship is crucial as it shows that on average, at low levels of disadvantage small increases have a more severe impact on attainment level, whereas at higher levels, similar changes have much reduced effects.
+
+

@@ -1,0 +1,1903 @@
+---
+title: "QM_Code"
+output:
+  pdf_document: default
+  html_document: default
+date: "2026-01-05"
+---
+
+1. Data Wrangling 
+
+```{r}
+# Load Required libraries
+library(sf)              # modern spatial vector data (points/lines/polygons, CRS, spatial ops)
+library(tidyverse)       # core data wrangling + plotting (dplyr, readr, tibble, etc.)
+library(tmap)            # thematic mapping for sf/raster (static + interactive maps)
+library(tmaptools)       # helper tools for tmap (basemaps, geocoding, bbox utilities)
+library(janitor)         # quick data cleaning (clean_names, tabulations, etc.)
+library(stringr)         # string/text handling (str_detect, str_replace, regex work)
+library(here)            # safe, project-root-based file paths (here("data", "file.csv"))
+library(raster)          # older raster package (still used, but being replaced by terra)
+library(terra)           # modern fast raster + vector grids (rast, crop, mask, project)
+library(classInt)        # create class breaks for choropleths (jenks, quantiles, etc.)
+library(ggplot2)         # general plotting (histograms, violins, geom_sf, etc.)
+library(grid)            # low-level graphics; used for custom layout and insets
+library(spatstat)        # point pattern analysis (ppp, Ripley’s K, quadrats, KDE)
+library(fpc)             # clustering methods; here for DBSCAN on point coords
+library(ggspatial)       # spatial helpers for ggplot (basemaps, north arrow, scalebar)
+library(colorblindcheck) # check palettes for colour-blind accessibility
+library(cols4all)        # big palette collection + GUI for choosing colour schemes
+library(plotly)
+library(rJava)
+library(OpenStreetMap)
+
+```
+
+**Data Wrangling:**
+We are Going to prepare ready files to merge on the MSOA scale. then filter by intersect only For London
+
+**1. Births File:**
+  - Births File
+  - Turn to CSV
+  - Select Sheet Named 2 - Remove first 5 Rows
+  - Filter Period only to the last 2 years for a larger sample 2019 - 2020 / 2020 - 2021. we selected these years as we wanted a larger sample
+  - Group by area regardless of year.
+  - do a sum column
+
+```{r}
+# 1) Read CSV file and skip first 5 rows 
+births_raw <- read_csv(here::here("data", "Births.csv"),
+                       locale = locale(encoding = "latin1"),
+                       na = " ", skip=5)
+# 2) Periods we want to keep 
+keep_periods <- c(
+  "2019-2020","2020-2021")
+
+# 3) Clean column names (optional but highly recommended)
+births <- births_raw %>%
+  janitor::clean_names() %>%
+  mutate(period = stringr::str_trim(period))  # in case there are sneaky spaces
+
+# 4) Filter to the last periods, then group by area (MSOA), summing all age columns
+births_msoa_sum <- births %>%
+  filter(period %in% keep_periods) %>%
+  
+  group_by(msoa_2021_code) %>%
+  summarise(
+    across(
+      c(`x19_and_under`, `x20_24`, `x25_29`, `x30_34`, `x35_39`, `x40_44`, `x45_and_over`),
+      ~ sum(.x, na.rm = TRUE)
+    ),
+    .groups = "drop"
+  ) %>%
+  
+  # 5) Add a total births column across age groups
+  mutate(total_births = rowSums(across(c(`x19_and_under`, `x20_24`, `x25_29`, `x30_34`, `x35_39`, `x40_44`, `x45_and_over`)), na.rm = TRUE))
+
+births_msoa_sum
+
+# So now we have a table that has the last 2 years of births since 2019-2021 summed by MSOA
+# later we have to aggregate for London boundry only. 
+```
+
+**2. Population by Age File:**
+  - Read file
+  - Skip the first 3 Rows
+  - Clean janitor
+  - Keep Columns MSOA 2021 Code / MSOA 2021 Name / Keep columns contaning F for female then keep ages of 15 till 55
+  - and group by `x19_and_under`, `x20_24`, `x25_29`, `x30_34`, `x35_39`, `x40_44`, `x45_and_over`
+  - then have total column 
+
+```{r}
+# 1) Read CSV and clean columns for easier read
+pop_raw <- read_csv(here::here("data", "Demographics_Age.csv"),
+                       locale = locale(encoding = "latin1"),
+                       na = " ", skip=3) %>%
+  janitor::clean_names()
+
+# 2) Columns we wish to keep
+# select and filter + detect with F 
+pop_f <- pop_raw %>% 
+  select(msoa_2021_code, msoa_2021_name, matches("^f\\d+$")  # keeps f0, f1, f2... etc
+  )
+
+# 3) Group by age ranges same as birth ranges
+pop_female_grouped <- pop_f %>%
+  mutate(
+    f_pop_19_and_under = rowSums(select(., f15:f19), na.rm = TRUE),
+    f_pop_20_24        = rowSums(select(., f20:f24), na.rm = TRUE),
+    f_pop_25_29        = rowSums(select(., f25:f29), na.rm = TRUE),
+    f_pop_30_34        = rowSums(select(., f30:f34), na.rm = TRUE),
+    f_pop_35_39        = rowSums(select(., f35:f39), na.rm = TRUE),
+    f_pop_40_44        = rowSums(select(., f40:f44), na.rm = TRUE),
+    f_pop_45_and_over  = rowSums(select(., f45:f55), na.rm = TRUE)
+  ) %>% 
+  
+# 4) Keep only needed columns
+  select(
+    msoa_2021_code,
+    msoa_2021_name,
+    starts_with("f_pop_")
+  ) %>%
+  
+# 5) Total female population (15–55)
+  mutate(
+    f_pop_total = rowSums(across(starts_with("f_pop_")), na.rm = TRUE)
+  )
+
+pop_female_grouped
+
+```
+**3. Housing File:** 
+  - Read file CSV
+  - Remove first 10 rows 
+  - clean names
+  - filter geography that contain MSOA only 
+  - group the room count so we have total of 1 bedroom 2 bedroom and so on (remove not known and total column)
+
+```{r}
+# 1) Read CSV file and filter only for MSOA
+house_raw <- read_csv(here::here("data", "Housing.csv"),
+                       locale = locale(encoding = "latin1"),
+                       na = " ", skip=9) %>%
+  janitor::clean_names() %>% 
+  filter(geography3 == "MSOA")
+
+# 2) change everything to numeric
+house_raw %>%
+  summarise(across(starts_with("x"), ~ class(.x)[1])) %>%
+  pivot_longer(everything(), names_to = "col", values_to = "class") %>%
+  filter(class != "numeric")
+
+
+house_clean <- house_raw %>%
+  mutate(across(where(is.character), ~ na_if(.x, "-"))) %>%
+  mutate(across(starts_with("x"), 
+                ~ if (is.character(.x)) parse_number(.x) else .x))
+
+# 3) Group Rooms and rename for easier read
+
+house <- house_clean %>%
+  mutate(
+    `1bed` = rowSums(across(c(x1_4, x1_10, x1_16, x1_22, x1_28)), na.rm = TRUE),
+    `2bed` = rowSums(across(c(x2_5, x2_11, x2_17, x2_23, x2_29)), na.rm = TRUE),
+    `3bed` = rowSums(across(c(x3_6, x3_12, x3_18, x3_24, x3_30)), na.rm = TRUE),
+    `4bed` = rowSums(across(c(x4_7, x4_13, x4_19, x4_25, x4_31)), na.rm = TRUE)
+  ) %>%
+# 4) Select columns we need only 
+  select(area_code4, `1bed`:`4bed`) %>%
+  mutate(
+    total_above2 = rowSums(across(c(`2bed`, `3bed`, `4bed`)), na.rm = TRUE),
+    total        = rowSums(across(c(`1bed`, `2bed`, `3bed`, `4bed`)), na.rm = TRUE)
+  )
+
+# 5) create calc of total houses over 2 bedroom and one bedroom with percenatege
+house <- house %>% 
+    mutate(
+    total_above2 = rowSums(across(c(`2bed`, `3bed`, `4bed`)), na.rm = TRUE),
+    total        = rowSums(across(c(`1bed`, `2bed`, `3bed`, `4bed`)), na.rm = TRUE),
+    pct_above2 = (total_above2/total),
+    pct_below2 = (`1bed`/total)
+    )
+
+```
+
+
+**4. Income File:** 
+  - Read file CSV
+  - no need to remove rows
+  - clean names
+  - create column calac housing prices per MSOA
+  
+```{r}
+# 1) Read CSV file and filter only for MSOA
+income_raw <- read_csv(here::here("data", "Income.csv"),
+                       locale = locale(encoding = "latin1"),
+                       na = " ", skip=0) %>%
+  janitor::clean_names() %>% 
+  rename(income_msoa = areacd,
+         net_before = disposable_net_annual_income_before_housing_costs_thousands,
+         net_after = disposable_net_annual_income_after_housing_costs_thousands)
+
+#2) Calc housing prices per MSOA avg
+income <- income_raw %>% 
+  mutate(house_price = net_before - net_after)
+
+```
+
+**Step Two: Master DATA FRAME with all variables (SHOCKING)**
+```{r}
+# Lets create one master data frame
+master_df <- pop_female_grouped %>%
+  left_join(births_msoa_sum, by = "msoa_2021_code") %>% 
+  left_join(income, by = c("msoa_2021_code" = "income_msoa")) %>% 
+  left_join(house, by = c("msoa_2021_code" = "area_code4"))
+```
+
+```{r}
+# lets rename columns
+master_df <- master_df %>% 
+  rename(b_19_and_under = x19_and_under,
+         b_20_24 = x20_24,
+         b_25_29 = x25_29,
+         b_30_34 = x30_34,
+         b_35_39 = x35_39,
+         b_40_44 = x40_44,
+         b_45_and_over = x45_and_over,
+         b_total = total_births,
+         income_net_before = net_before,
+         income_net_after = net_after,
+         income_net_house = house_price,
+         h_1bed = `1bed`,
+         h_2bed = `2bed`,
+         h_3bed = `3bed`,
+         h_4bed = `4bed`,
+         h_total_above2 = total_above2, 
+         h_total = total,
+         h_pct_above2 = pct_above2,
+         h_pct_below2 = pct_below2
+  )
+```
+
+```{r}
+names(master_df)
+```
+2.1 Create New Column for fertility 
+```{r}
+# Create a column that calculates the total number of fertility per 1000 women
+master_df <- master_df %>%
+  mutate(fertility_rate = (b_total / f_pop_total) * 1000)
+```
+2.2 Reading SHP files
+```{r}
+london <- st_read(here::here("shp",
+                            "gla",
+                            "gla",
+                            "London_GLA_Boundary.shp"))
+
+borough <- st_read(here::here("shp",
+                            "statistical-gis-boundaries-london",
+                            "statistical-gis-boundaries-london",
+                            "ESRI",
+                            "London_Borough_Excluding_MHW.shp"))
+
+# vector of borough MSOA shapefile paths
+files <- list.files(
+  "shp/LB_MSOA2021_shp/msoa2021/",
+  pattern = "\\.shp$",
+  full.names = TRUE
+)
+
+# read + combine
+msoa <- files %>%
+  lapply(st_read, quiet = TRUE) %>%
+  bind_rows() %>%
+  clean_names()
+
+```
+
+```{r}
+# Reorganize msoa file
+msoa_clean <- msoa %>% 
+  clean_names() %>% 
+  select(msoa21cd, 
+         lad22nm,
+         geometry)
+```
+2.3 Trim master data frame to just London
+```{r}
+master_df_london <- master_df %>%
+  semi_join(
+    msoa_clean,
+    by = c("msoa_2021_code" = "msoa21cd")
+  ) %>% 
+  drop_na()
+```
+
+**Step Three: First Observations**
+```{r}
+library(psych)
+psych::describe(master_df_london %>% select(fertility_rate, h_pct_below2, income_net_house))
+```
+
+**Step Four: Transform master London into a simple feature object**
+```{r}
+# Create the spatial version of your master data
+master_london_sf <- msoa_clean %>%
+  inner_join(master_df_london, by = c("msoa21cd" = "msoa_2021_code")) %>%
+  st_transform(27700) # Re-confirming OSGB36 CRS
+```
+
+Map: MSOA Fertility Above and Below London Avg.
+```{r}
+library(tmap)
+
+# Calculate the mean to use as a midpoint
+mean_fert <- mean(master_london_sf$fertility_rate, na.rm = TRUE)
+
+tm_shape(master_london_sf) +
+  tm_polygons("fertility_rate",
+              palette = "-RdBu", # Red-Blue diverging palette
+              midpoint = mean_fert, 
+              style = "pretty",
+              title = "Fertility vs. London Avg") +
+  tm_layout(main.title = "MSOA Fertility: Above/Below London Average",
+            legend.outside = TRUE)
+```
+
+Graph: Histogram Fertility Before Log VV
+```{r}
+library(ggplot2)
+library(showtext)
+
+font_add_google("IBM Plex Sans", "plex")
+showtext_auto()
+showtext_opts(dpi = 300)   # <-- IMPORTANT
+
+mean_val <- mean(master_df_london$fertility_rate, na.rm = TRUE)
+
+p <- ggplot(master_df_london, aes(x = fertility_rate)) + 
+  geom_histogram(
+    aes(y = ..density..),
+    bins = 50,
+    fill = "#7DA9A7",
+    color = "white",
+    alpha = 0.9
+  ) +
+  geom_density(
+    color = "#B33A3A",
+    linewidth = 0.7
+  ) +
+  geom_vline(
+    xintercept = mean_val,
+    linetype = "dashed",
+    linewidth = 0.5,
+    color = "#B33A3A"
+  ) +
+  annotate(
+    "text",
+    x = mean_val + 5,
+    y = 0.018,
+    label = paste0("Mean = ", round(mean_val, 2)),
+    family = "plex",
+    size = 5,
+    color = "#B33A3A",
+    hjust = 0
+  ) +
+  labs(
+    title = "Distribution of fertility rates across London MSOAs",
+    subtitle = "Fertility rates are highly right-skewed, with a small number of MSOAs exhibiting exceptionally high birth rates",
+    x = "Births per 1,000 women (ages 15–55)",
+    y = "Density",
+    caption = "Source: ONS | Analysis: Author"
+  ) +
+  theme_minimal(base_family = "plex") +
+  theme(
+    plot.title = element_text(
+      size = 20,          # <-- MUCH BIGGER
+      face = "bold",
+      margin = margin(b = 10)
+    ),
+    plot.subtitle = element_text(
+      size = 13,
+      color = "grey40",
+      margin = margin(b = 20)
+    ),
+    axis.title = element_text(size = 14),
+    axis.text = element_text(size = 12, color = "grey30"),
+    panel.grid.minor = element_blank(),
+    panel.grid.major.x = element_blank(),
+    plot.caption = element_text(
+      size = 10,
+      color = "grey50",
+      hjust = 0
+    )
+  )
+
+ggsave(
+  "distribution_msoa_fertility.png",
+  p,
+  width = 12,
+  height = 9,
+  dpi = 300
+)
+
+p
+
+```
+
+Top High Fertility
+```{r}
+# Pulling the top 5 MSOAs to identify their Boroughs (LAD11NM)
+
+top_outliers <- master_london_sf %>%
+  arrange(desc(fertility_rate)) %>%
+  head(5) %>%
+  select(msoa21cd,
+         lad22nm,
+         fertility_rate)
+
+print(top_outliers)
+```
+
+**Step Five: Analysis and Logs**
+- Log Transformation to all three variables
+- Histograms of before and after
+- Notes: "To address negative values in the housing cost estimate (min = -9.43) and allow for $log_{10}$ transformation, a constant offset of +10 was applied to all observations in the income_net_house variable".
+```{r}
+# Define a tiny epsilon to prevent math errors at exactly 0 or 1
+eps <- 0.001
+
+master_london_sf <- master_london_sf %>%
+  mutate(
+    # 1. Log for Fertility (standard for counts with outliers)
+    log_fertility = log10(fertility_rate),
+    
+    # 2. Log + 10 for Housing Cost (standard for income-based data)
+    log_housing_cost = log10(income_net_house + 10),
+    
+    # 3. Logit for Small Dwellings (Best for proportions/percentages)
+    logit_small_dwellings = log((h_pct_below2 + eps) / (1 - h_pct_below2 + eps))
+  )
+
+```
+
+Fertility rates were log₁₀-transformed to reduce right skew. Housing income was log-transformed after adding a constant to accommodate negative values. The proportion of small dwellings was logit-transformed to respect its bounded nature and improve distributional symmetry.
+
+Histogram Fertility_rate + log_fertility VV
+```{r}
+library(ggplot2)
+library(patchwork)
+library(showtext)
+
+font_add_google("IBM Plex Sans", "plex")
+showtext_auto()
+showtext_opts(dpi = 300)   # <-- CRITICAL for correct export scaling
+
+# -----------------------------
+# Base theme
+# -----------------------------
+base_theme <- theme_minimal(base_family = "plex") +
+  theme(
+    plot.title = element_text(size = 15, face = "bold", hjust = 0),
+    axis.title = element_text(size = 12),
+    axis.text = element_text(size = 12, color = "grey30"),
+    panel.grid.minor = element_blank(),
+    panel.grid.major.x = element_blank()
+  )
+
+# -----------------------------
+# Raw histogram
+# -----------------------------
+p1 <- ggplot(master_london_sf, aes(x = fertility_rate)) +
+  geom_histogram(
+    bins = 50,
+    fill = "#E8A89A",
+    color = "white",
+    alpha = 0.9
+  ) +
+  labs(
+    title = "Raw Fertility Rates",
+    x = "Births per 1,000 women",
+    y = "Count"
+  ) +
+  base_theme
+
+# -----------------------------
+# Log histogram
+# -----------------------------
+p2 <- ggplot(master_london_sf, aes(x = log_fertility)) +
+  geom_histogram(
+    bins = 50,
+    fill = "#B33A3A",
+    color = "white",
+    alpha = 0.85
+  ) +
+  labs(
+    title = "Log-Transformed Fertility Rates",
+    x = "Log₁₀(Fertility rate)",
+    y = "Count"
+  ) +
+  base_theme
+
+# -----------------------------
+# Combine with annotation
+# -----------------------------
+final_plot <- p1 + p2 +
+  plot_annotation(
+    title = "Effect of log transformation on fertility rates",
+    subtitle = " ",
+    theme = theme(
+      plot.title = element_text(
+        size = 20,          # <-- scaled for export
+        face = "bold",
+        family = "plex",
+        margin = margin(b = 8)
+      ),
+      plot.subtitle = element_text(
+        size = 13,
+        color = "grey40",
+        family = "plex",
+        margin = margin(b = 20)
+      )
+    )
+  )
+
+# -----------------------------
+# Save
+# -----------------------------
+ggsave(
+  "logbirth.png",
+  final_plot,
+  width = 12,
+  height = 8,
+  dpi = 300
+)
+
+```
+Histogram income_net_house + log_housing_cost VV
+```{r}
+library(ggplot2)
+library(patchwork)
+library(showtext)
+
+# Same font as previous figures
+font_add_google("IBM Plex Sans", "plex")
+showtext_auto()
+showtext_opts(dpi = 300)   # <-- CRITICAL for correct export scaling
+
+# -----------------------------
+# Base theme
+# -----------------------------
+base_theme <- theme_minimal(base_family = "plex") +
+  theme(
+    plot.title = element_text(size = 15, face = "bold", hjust = 0),
+    axis.title = element_text(size = 12),
+    axis.text = element_text(size = 12, color = "grey30"),
+    panel.grid.minor = element_blank(),
+    panel.grid.major.x = element_blank()
+  )
+
+# -----------------------------
+# Raw income histogram
+# -----------------------------
+i1 <- ggplot(master_london_sf, aes(x = income_net_house)) +
+  geom_histogram(
+    bins = 50,
+    fill = "#E7A1B0",
+    color = "white",
+    alpha = 0.9
+  ) +
+  labs(
+    title = "Raw Net Household Income",
+    x = "Net household income (£)",
+    y = "Count"
+  ) +
+  base_theme
+
+# -----------------------------
+# Log housing cost histogram
+# -----------------------------
+i2 <- ggplot(master_london_sf, aes(x = log_housing_cost)) +
+  geom_histogram(
+    bins = 50,
+    fill = "#7A1F2B",
+    color = "white",
+    alpha = 0.85
+  ) +
+  labs(
+    title = "Log-Transformed Housing Costs",
+    x = "Log₁₀(Housing cost)",
+    y = "Count"
+  ) +
+  base_theme
+
+# -----------------------------
+# Combine with annotation
+# -----------------------------
+final_plot <- i1 + i2 +
+  plot_annotation(
+    title = "Distributional effects of log transformation\non income and housing costs",
+    subtitle = " ",
+    theme = theme(
+      plot.title = element_text(
+        size = 20,          # <-- scaled for export
+        face = "bold",
+        family = "plex",
+        margin = margin(b = 8)
+      ),
+      plot.subtitle = element_text(
+        size = 13,
+        color = "grey40",
+        family = "plex",
+        margin = margin(b = 20)
+      )
+    )
+  )
+
+# -----------------------------
+# Save
+# -----------------------------
+ggsave(
+  "logincome.png",
+  final_plot,
+  width = 12,
+  height = 8,
+  dpi = 300
+)
+```
+Histogram h_pct_below2 + log_small_dwellings VV
+```{r}
+library(ggplot2)
+library(patchwork)
+library(showtext)
+
+# Same font as all previous figures
+font_add_google("IBM Plex Sans", "plex")
+showtext_auto()
+showtext_opts(dpi = 300)   # <-- CRITICAL for correct export scaling
+
+# -----------------------------
+# Base theme
+# -----------------------------
+base_theme <- theme_minimal(base_family = "plex") +
+  theme(
+    plot.title = element_text(size = 15, face = "bold", hjust = 0),
+    axis.title = element_text(size = 12),
+    axis.text = element_text(size = 12, color = "grey30"),
+    panel.grid.minor = element_blank(),
+    panel.grid.major.x = element_blank()
+  )
+
+# -----------------------------
+# Raw small-dwellings histogram
+# -----------------------------
+h1 <- ggplot(master_london_sf, aes(x = h_pct_below2)) +
+  geom_histogram(
+    bins = 50,
+    fill = "#9EC6DF",
+    color = "white",
+    alpha = 0.9
+  ) +
+  labs(
+    title = "Raw Share of Small Dwellings",
+    x = "Proportion of dwellings with ≤2 bedrooms",
+    y = "Count"
+  ) +
+  base_theme
+
+# -----------------------------
+# Logit-transformed histogram
+# -----------------------------
+h2 <- ggplot(master_london_sf, aes(x = logit_small_dwellings)) +
+  geom_histogram(
+    bins = 50,
+    fill = "#2F4F4F",
+    color = "white",
+    alpha = 0.85
+  ) +
+  labs(
+    title = "Logit-Transformed Small Dwellings Share",
+    x = "Logit(proportion ≤2 bedrooms)",
+    y = "Count"
+  ) +
+  base_theme
+
+# -----------------------------
+# Combine with annotation
+# -----------------------------
+final_plot <- h1 + h2 +
+  plot_annotation(
+    title = "Distribution of small-dwelling prevalence\nbefore and after logit transformation",
+    subtitle = " ",
+    theme = theme(
+      plot.title = element_text(
+        size = 20,          # <-- scaled for export
+        face = "bold",
+        family = "plex",
+        margin = margin(b = 8)
+      ),
+      plot.subtitle = element_text(
+        size = 13,
+        color = "grey40",
+        family = "plex",
+        margin = margin(b = 20)
+      )
+    )
+  )
+
+# -----------------------------
+# Save
+# -----------------------------
+ggsave(
+  "logdwelling.png",
+  final_plot,
+  width = 12,
+  height = 8,
+  dpi = 300
+)
+```
+
+Pearson Correlation VV
+```{r}
+library(ggcorrplot)
+library(showtext)
+
+# Same font system as all figures
+font_add_google("IBM Plex Sans", "plex")
+showtext_auto()
+showtext_opts(dpi = 300)   # <-- CRITICAL for correct export scaling
+
+# -----------------------------
+# Select final variables
+# -----------------------------
+final_analysis_vars <- master_london_sf %>%
+  st_drop_geometry() %>%
+  select(
+    log_fertility,
+    logit_small_dwellings,
+    log_housing_cost
+  )
+
+# -----------------------------
+# Correlation matrix
+# -----------------------------
+final_matrix <- cor(final_analysis_vars, use = "complete.obs")
+
+# -----------------------------
+# Correlation plot
+# -----------------------------
+p_corr <- ggcorrplot(
+  final_matrix,
+  type = "lower",
+  lab = TRUE,
+  lab_size = 5,
+  colors = c("#2F4F4F", "white", "#B33A3A"),
+  outline.col = "white"
+) +
+  labs(
+    title = "Relationships between fertility, housing costs and dwelling size",
+    subtitle = "Pairwise Pearson correlations after log and logit transformations",
+    caption = "Note: Values closer to ±1 indicate stronger linear association"
+  ) +
+  theme_minimal(base_family = "plex") +
+  theme(
+    # make title/subtitle/caption align within the whole plot region
+    plot.title.position = "plot",
+    plot.caption.position = "plot",
+
+    plot.title = element_text(
+      size = 20,
+      face = "bold",
+      hjust = 1,              # fully right within plot
+      margin = margin(b = 8)
+    ),
+    plot.subtitle = element_text(
+      size = 13,
+      color = "grey40",
+      hjust = 1,              # right align subtitle
+      margin = margin(b = 20)
+    ),
+    plot.caption = element_text(
+      size = 11,
+      color = "grey50",
+      hjust = 1               # right align caption
+    ),
+    axis.text = element_text(
+      size = 13,
+      color = "grey30"
+    ),
+    panel.grid = element_blank(),
+    plot.margin = margin(t = 10, r = 20, b = 10, l = 10)
+  )
+
+p_corr
+
+ggsave(
+  "correlationmatrix.png",
+  plot = p_corr,
+  width = 10,
+  height = 8,
+  dpi = 300
+)
+```
+Housing cost and the prevalence of small dwellings are strongly correlated, reflecting underlying spatial and market structures in London. Fertility shows only a weak negative association with dwelling size and virtually no direct association with housing cost, suggesting that housing form rather than price alone may play a more important role in shaping fertility pattern
+
+linear regression
+```{r}
+lm(log_fertility ~ logit_small_dwellings + log_housing_cost, data = master_london_sf)
+```
+A one-unit increase in the log-odds of small dwellings is associated with a ~3.6% decrease in fertility (on the log scale).
+Housing form (dwelling size mix) has a stronger and more consistent relationship with fertility than housing cost alone.
+Controlling for housing cost, a higher prevalence of small dwellings is associated with lower fertility. Housing cost itself shows a positive association once housing form is accounted for, suggesting that dwelling structure may play a more important role than price alone in shaping fertility patterns across London.
+
+Anova test
+```{r}
+# One-Way ANOVA: Does Fertility differ by Borough?
+# Replace 'borough_name' with the actual column name in your data
+anova_res <- aov(log_fertility ~ lad22nm, data = master_london_sf)
+summary(anova_res)
+```
+The p-value (Pr(>F)): It is < 2e-16. This is statistically as small as it gets, meaning the probability that the differences between London boroughs are just "random chance" is effectively zero.
+
+The F-value: At 17.02, it shows that the variation in fertility between boroughs is much larger than the variation within each borough.
+Conclusion for your notes: You have proven that Borough matters. This justifies moving away from a simple linear regression (which treats all 963 MSOAs as independent) to a Linear Mixed Effects (LME) model (which recognizes that MSOAs are nested within boroughs).
+
+A one-way ANOVA indicates significant differences in mean log-fertility across London boroughs (F = 17.02, p < 0.001), suggesting that fertility patterns are structured by borough-level context rather than being randomly distributed across space.
+
+WE Scatter Plot VV
+```{r}
+library(ggplot2)
+library(sf)
+library(showtext)
+library(grid)  # for unit()
+
+font_add_google("IBM Plex Sans", "plex")
+showtext_auto()
+showtext_opts(dpi = 300)   # <-- CRITICAL for correct export scaling
+
+# Project and create safe points
+master_london_sf <- st_transform(master_london_sf, 27700)
+pts <- st_point_on_surface(master_london_sf)
+coords <- st_coordinates(pts)
+master_london_sf$X <- coords[, 1]
+master_london_sf$Y <- coords[, 2]
+
+log_mean_val <- log10(80.48)
+central_easting <- 530000
+
+base_theme <- theme_minimal(base_family = "plex") +
+  theme(
+    plot.title = element_text(size = 20, face = "bold", margin = margin(b = 8)),
+    plot.subtitle = element_text(size = 13, color = "grey40", margin = margin(b = 18)),
+    axis.title = element_text(size = 11),
+    axis.text = element_text(size = 10, color = "grey30"),
+    panel.grid.minor = element_blank(),
+    panel.grid.major.x = element_blank(),
+
+    legend.position = "bottom",
+    legend.title = element_text(size = 9, face = "bold"),
+    legend.text = element_text(size = 6.5),
+    legend.key.height = unit(0.22, "cm"),
+    legend.key.width  = unit(0.40, "cm"),
+    legend.spacing.x  = unit(0.08, "cm"),
+    legend.spacing.y  = unit(0.03, "cm"),
+    legend.box.margin = margin(t = -6),
+    legend.margin = margin(t = 0, b = 0)
+  )
+
+p_we <- ggplot(master_london_sf, aes(x = X, y = log_fertility)) +
+  geom_point(aes(color = lad22nm), alpha = 0.45, size = 0.8) +
+  geom_smooth(method = "loess", color = "red", linewidth = 0.9, se = TRUE) +
+  geom_hline(yintercept = log_mean_val, linetype = "dashed", linewidth = 0.8, color = "#2F4F4F") +
+  geom_vline(xintercept = central_easting, linetype = "dotted", linewidth = 0.8, color = "grey45") +
+  annotate(
+    "text",
+    x = central_easting + 500, y = 1.42,
+    label = "CENTRAL LONDON",
+    angle = 90,
+    size = 3.0,
+    color = "grey40",
+    fontface = "bold",
+    family = "plex"
+  ) +
+  annotate(
+    "text",
+    x = min(master_london_sf$X, na.rm = TRUE) + 2000,
+    y = log_mean_val + 0.03,
+    label = paste0("CITY MEAN (", round(log_mean_val, 2), ")"),
+    color = "#2F4F4F",
+    size = 3.6,
+    fontface = "bold",
+    family = "plex",
+    hjust = 0
+  ) +
+  labs(
+    title = "West–East fertility gradient",
+    subtitle = "Log10 fertility rate by MSOA point (LOESS trend + city mean)",
+    x = "Easting (metres)",
+    y = "Log10 fertility rate",
+    color = "Borough sector"
+  ) +
+  base_theme +
+  guides(
+    color = guide_legend(
+      ncol = 8,
+      title.position = "top",
+      byrow = TRUE,
+      override.aes = list(alpha = 1, size = 2)
+    )
+  )
+
+p_we
+
+ggsave("ScatterplotWE.png", plot = p_we, width = 12, height = 8, dpi = 300)
+
+```
+
+The plot reveals a clear east–west spatial gradient in fertility across London, with lower values concentrated in central–western MSOAs and higher values toward the east. The non-linear trend and borough-level clustering suggest that fertility patterns are spatially structured and reflect broader socio-spatial processes rather than random variation.
+
+NS scatter plot VV
+```{r}
+library(ggplot2)
+library(patchwork)
+library(showtext)
+
+font_add_google("IBM Plex Sans", "plex")
+showtext_auto()
+showtext_opts(dpi = 300)   # <-- CRITICAL for correct export scaling
+
+
+# Project + point extraction
+master_london_sf <- st_transform(master_london_sf, 27700)
+pts <- st_point_on_surface(master_london_sf)
+coords <- st_coordinates(pts)
+master_london_sf$X <- coords[, 1]
+master_london_sf$Y <- coords[, 2]   # northing
+
+# Reference values
+log_mean_val <- log10(80.48)
+central_northing <- 180000
+
+# Theme (consistent + tight legend)
+base_theme <- theme_minimal(base_family = "plex") +
+  theme(
+    plot.title = element_text(size = 20, face = "bold", margin = margin(b = 8)),
+    plot.subtitle = element_text(size = 13, color = "grey40", margin = margin(b = 18)),
+    axis.title = element_text(size = 11),
+    axis.text = element_text(size = 10, color = "grey30"),
+    panel.grid.minor = element_blank(),
+    panel.grid.major.x = element_blank(),
+
+    legend.position = "bottom",
+    legend.title = element_text(size = 9, face = "bold"),
+    legend.text = element_text(size = 6.5),
+    legend.key.height = unit(0.22, "cm"),
+    legend.key.width  = unit(0.40, "cm"),
+    legend.spacing.x  = unit(0.08, "cm"),
+    legend.spacing.y  = unit(0.03, "cm"),
+    legend.box.margin = margin(t = -6),
+    legend.margin = margin(t = 0, b = 0)
+  )
+
+# Plot
+p_ns <- ggplot(master_london_sf, aes(x = Y, y = log_fertility)) +
+  geom_point(aes(color = lad22nm), alpha = 0.45, size = 0.8) +
+  geom_smooth(method = "loess", color = "red", linewidth = 0.9, se = TRUE) +
+  geom_hline(yintercept = log_mean_val, linetype = "dashed", linewidth = 0.8, color = "#2F4F4F") +
+  geom_vline(xintercept = central_northing, linetype = "dotted", linewidth = 0.8, color = "grey45") +
+  annotate(
+    "text",
+    x = central_northing + 500, y = 1.42,
+    label = "CENTRAL LONDON",
+    angle = 90,
+    size = 3.0,
+    color = "grey40",
+    fontface = "bold",
+    family = "plex"
+  ) +
+  annotate(
+    "text",
+    x = min(master_london_sf$Y, na.rm = TRUE) + 2000,
+    y = log_mean_val + 0.03,
+    label = paste0("CITY MEAN (", round(log_mean_val, 2), ")"),
+    color = "#2F4F4F",
+    size = 3.6,
+    fontface = "bold",
+    family = "plex",
+    hjust = 0
+  ) +
+  labs(
+    title = "North–South fertility gradient",
+    subtitle = "Log10 fertility rate by MSOA point (LOESS trend + city mean)",
+    x = "Northing (metres)",
+    y = "Log10 fertility rate",
+    color = "Borough sector"
+  ) +
+  base_theme +
+  guides(
+    color = guide_legend(
+      ncol = 8,
+      title.position = "top",
+      byrow = TRUE,
+      override.aes = list(alpha = 1, size = 2)
+    )
+  )
+
+p_ns
+
+ggsave("ScatterplotNS.png", plot = p_ns, width = 12, height = 8, dpi = 300)
+
+```
+
+
+Linear regression
+```{r}
+lm_simple <- lm(
+  log_fertility ~ logit_small_dwellings + log_housing_cost,
+  data = master_london_sf
+)
+
+summary(lm_simple)
+
+```
+STD
+```{r}
+lm_std <- lm(
+  log_fertility ~ scale(logit_small_dwellings) + scale(log_housing_cost),
+  data = master_london_sf
+)
+
+summary(lm_std)
+```
+
+LRM Health test VV
+```{r}
+library(broom)
+library(dplyr)
+library(ggplot2)
+library(patchwork)
+library(showtext)
+library(grid)  # for unit()
+
+font_add_google("IBM Plex Sans", "plex")
+showtext_auto()
+showtext_opts(dpi = 300)   # <-- CRITICAL for correct export scaling
+
+# Model
+m <- lm(log_fertility ~ logit_small_dwellings + log_housing_cost, data = master_london_sf)
+aug <- augment(m)
+
+# Theme for all panels
+diag_theme <- theme_minimal(base_family = "plex") +
+  theme(
+    plot.title = element_text(size = 14, face = "bold", margin = margin(b = 6)),
+    axis.title = element_text(size = 11),
+    axis.text = element_text(size = 10, color = "grey30"),
+    panel.grid.minor = element_blank(),
+    panel.grid.major.x = element_blank()
+  )
+
+pt_col <- "grey30"
+line_col <- "#B33A3A"
+zero_col <- "grey55"
+
+# 1) Residuals vs Fitted
+p1 <- ggplot(aug, aes(.fitted, .resid)) +
+  geom_point(alpha = 0.35, size = 1.2, color = pt_col) +
+  geom_smooth(method = "loess", se = FALSE, linewidth = 1, color = line_col) +
+  geom_hline(yintercept = 0, linetype = "dashed", linewidth = 0.6, color = zero_col) +
+  labs(title = "Residuals vs fitted", x = "Fitted values", y = "Residuals") +
+  diag_theme
+
+# 2) Q-Q Plot (standardized residuals)
+p2 <- ggplot(aug, aes(sample = .std.resid)) +
+  stat_qq(alpha = 0.35, size = 1.2, color = pt_col) +
+  stat_qq_line(linewidth = 1, color = line_col) +
+  labs(title = "Normal Q–Q", x = "Theoretical quantiles", y = "Standardised residuals") +
+  diag_theme
+
+# 3) Scale-Location
+p3 <- ggplot(aug, aes(.fitted, sqrt(abs(.std.resid)))) +
+  geom_point(alpha = 0.35, size = 1.2, color = pt_col) +
+  geom_smooth(method = "loess", se = FALSE, linewidth = 1, color = line_col) +
+  labs(
+    title = "Scale–location",
+    x = "Fitted values",
+    y = expression(sqrt("|Standardised residuals|"))
+  ) +
+  diag_theme
+
+# 4) Residuals vs Leverage (Cook's distance sizing)
+p4 <- ggplot(aug, aes(.hat, .std.resid)) +
+  geom_point(aes(size = .cooksd), alpha = 0.35, color = pt_col) +
+  geom_smooth(method = "loess", se = FALSE, linewidth = 1, color = line_col) +
+  geom_hline(yintercept = 0, linetype = "dashed", linewidth = 0.6, color = zero_col) +
+  scale_size_continuous(range = c(1, 5), guide = "none") +
+  labs(title = "Residuals vs leverage", x = "Leverage", y = "Standardised residuals") +
+  diag_theme
+
+# Combine + add a shared title/subtitle
+p_diag <- (p1 | p2) / (p3 | p4) +
+  plot_annotation(
+    title = "Linear model diagnostics",
+    subtitle = "log_fertility ~ logit_small_dwellings + log_housing_cost",
+    theme = theme(
+      plot.title = element_text(size = 20, face = "bold", family = "plex", margin = margin(b = 5)),
+      plot.subtitle = element_text(size = 13, color = "grey40", family = "plex", margin = margin(b = 14))
+    )
+  )
+
+p_diag
+
+ggsave("LM_Health_Check.png", plot = p_diag, width = 12, height = 9, dpi = 300)
+
+
+```
+
+A multivariate linear regression indicates that neighbourhoods with a higher proportion of small dwellings exhibit significantly lower fertility rates, even after controlling for housing costs. In contrast, higher housing costs are positively associated with fertility, suggesting a compositional effect linked to affluence rather than affordability constraints.
+
+While housing affordability is often framed as a primary constraint on fertility, the results suggest that housing form—particularly the prevalence of small dwellings—plays a more decisive role. High-cost areas are not uniformly associated with lower fertility, indicating that affordability alone does not explain spatial variation in birth rates across London.
+
+PCA test
+```{r}
+# 1. Run PCA on the two 'Squeeze' variables
+pca_results <- prcomp(master_london_sf %>% 
+                        st_drop_geometry() %>% 
+                        select(logit_small_dwellings, log_housing_cost), 
+                      scale. = TRUE)
+
+# 2. Add the first component (the Squeeze Index) to your main data
+# We multiply by -1 if needed to ensure higher values = higher squeeze
+master_london_sf$squeeze_index <- pca_results$x[,1]
+
+# 3. Quick Validation: Correlation between Squeeze and Fertility
+cor(master_london_sf$log_fertility, master_london_sf$squeeze_index)
+```
+To summarize your PCA results: While Principal Component Analysis successfully merged "Space" and "Price" into a single Urban Squeeze Index, the resulting weak correlation of -0.059 with fertility suggests that these environmental pressures do not influence birth rates in a uniform, linear way across the entire city.
+
+A composite squeeze index shows only a weak overall association with fertility, suggesting that housing form and cost operate through distinct mechanisms.
+```{r}
+pca_results$rotation
+```
+
+
+Clustering
+
+```{r}
+set.seed(123) # For consistent results
+
+# Select variables for clustering
+cluster_data <- master_london_sf %>%
+  st_drop_geometry() %>%
+  select(log_fertility, logit_small_dwellings, log_housing_cost) %>%
+  scale() # Standardize so they have equal weight
+
+# Run K-means (let's start with 4 clusters: The 4 faces of London)
+clusters <- kmeans(cluster_data, centers = 3, nstart = 25)
+
+# Add cluster labels back to your main data
+master_london_sf$type_cluster <- as.factor(clusters$cluster)
+
+# Check the sizes of your new "neighborhood types"
+table(master_london_sf$type_cluster)
+```
+```{r}
+install.packages("factoextra")
+library(factoextra)
+
+fviz_nbclust(cluster_data, kmeans, method = "wss")
+```
+
+```{r}
+master_london_sf %>%
+  group_by(type_cluster) %>%
+  summarise(
+    mean_fertility = mean(log_fertility),
+    mean_small_dwellings = mean(logit_small_dwellings),
+    mean_housing_cost = mean(log_housing_cost)
+  )
+```
+```{r}
+# ---- Top 100 MSOAs by fertility ----
+top100_msoa <- master_london_sf %>%
+  arrange(desc(log_fertility)) %>%
+  slice(1:100)
+
+```
+
+```{r}
+library(tmap)
+library(sf)
+library(dplyr)
+library(stringr)
+
+# 1. Update cluster labels and wrap Borough names
+master_london_sf <- master_london_sf %>%
+  mutate(cluster_label = case_when(
+    type_cluster == 1 ~ "High Fertility, Low HPI",
+    type_cluster == 2 ~ "Mid Fertility, Mid HPI",
+    type_cluster == 3 ~ "Low Fertility, High HPI"
+  ))
+
+borough <- borough %>%
+  mutate(NAME_wrapped = str_replace_all(NAME, " ", "\n"))
+
+# 2. Define your new specific color palette
+# High = Dark Pink, Mid = Purple, Low = Blue
+cluster_colors <- c(
+  "High Fertility, Low HPI" = "#203F9A",  # Medium Violet Red (Dark Pink)
+  "Mid Fertility, Mid HPI"  = "#4E7CB2",  # Purple
+  "Low Fertility, High HPI" = "#94C2DA"   # Steel Blue
+)
+
+tmap_mode("plot")
+
+# Reprojecting
+master_london_sf <- st_transform(master_london_sf, 3857)
+london <- st_transform(london, 3857)
+borough <- st_transform(borough, 3857)
+
+clust <- tm_basemap("CartoDB.PositronNoLabels") +
+  tm_shape(master_london_sf) +
+  tm_fill(
+    col = "cluster_label",
+    palette = cluster_colors,
+    title = "Cluster Map",
+    alpha = 0.8
+  ) +
+  
+  
+  tm_borders(col = "#F7F7F7", lwd = 0.45) +
+  
+  tm_shape(top100_msoa) + 
+  tm_borders(col = "magenta", lwd = 1) + 
+
+  tm_shape(borough) +
+  tm_borders(col = "grey20", lwd = 0.9) +
+  tm_text(
+    "NAME_wrapped",
+    size = 0.6,
+    col = "black",
+    fontface = "bold",
+    case = "upper",
+    bg.color = "white",
+    bg.alpha = 1,
+    bg.width = 0.6,   # tighten horizontal padding
+    bg.height = 0.6   # tighten vertical padding
+  ) +
+  
+  tm_shape(london) +
+  tm_borders(col = "navy", lwd = 3) +
+  
+  tm_layout(
+    fontfamily = "sans",
+    fontsize = 1.6,
+
+    title = "Housing Profile Index - Fertility Cluster",
+    title.position = c("left", "top"),
+    title.size = 1.2,
+    title.fontface = "bold",
+    title.bg.color = "white",       # Wipeout effect
+    title.bg.alpha = 1,
+
+    legend.outside = FALSE,
+    legend.position = c("right", "bottom"),
+    legend.title.size = 0.9,
+    legend.text.size = 0.7,
+
+    frame = FALSE,
+    inner.margins = c(0.06, 0.02, 0.05, 0.02),
+    outer.margins = c(0.01, 0.01, 0.01, 0.01),
+    bg.color = "white"
+  ) +
+  
+  tm_add_legend(
+    type = "line",
+    labels = "Top 100 MSOAs by fertility",
+    col = "magenta",
+    lwd = 2
+  ) +
+  
+  tm_credits(
+    "HPI = Index combines housing-cost pressure and the concentration of smaller dwellings at MSOA level (standardised).",
+    position = c("left", "bottom"),
+    size = 0.85,
+    color = "grey40"
+  )
+
+clust
+
+tmap_save(clust, "London_fertility_HPI_map.png", width = 12, height = 10, units = "in", dpi = 300)
+tmap_save(clust, "London_fertility_HPI_map.pdf", width = 12, height = 10, units = "in")
+
+```
+
+“London MSOAs can be grouped into a small number of distinct housing–fertility profiles.”
+London’s MSOAs fall into three distinct housing–fertility profiles, reflecting different combinations of spatial constraint, affordability pressure, and reproductive behavior. These clusters reveal that housing form and cost interact with fertility in patterned, localized ways — not uniformly across the city.
+
+Here’s a clean summary of your **three housing–fertility cluster types**, based on your standardized means and mapped distribution:
+
+---
+
+## 🧭 **London’s Housing–Fertility Clusters**
+
+### 🟥 **Cluster 3: Low Fertility, High Cost, Larger Dwellings**
+- **Fertility**: Lowest
+- **Housing Cost**: High
+- **Small Dwellings**: Least prevalent
+- **Interpretation**: Likely affluent areas with older demographics or delayed family formation. High cost doesn’t translate into high fertility.
+
+---
+
+### 🟧 **Cluster 2: Mid Fertility, Lower Cost, Very Small Dwellings**
+- **Fertility**: Moderate
+- **Housing Cost**: Lower
+- **Small Dwellings**: Most prevalent
+- **Interpretation**: Dense, affordable zones with constrained space. Possibly younger or transitional populations, more renters, or migrant communities.
+
+---
+
+### 🟨 **Cluster 1: High Fertility, High Cost, Moderate Space**
+- **Fertility**: Highest
+- **Housing Cost**: High
+- **Small Dwellings**: Moderately prevalent
+- **Interpretation**: Areas with strong family networks or cultural norms supporting higher birth rates despite cost. May include social housing or multi-generational households.
+
+
+
+LME
+```{r}
+library(lme4)
+library(lmerTest)
+
+# Mixed Effects Model: Log-Fertility ~ Squeeze Index + (Random Effect for Borough)
+lme_results <- lmer(log_fertility ~ squeeze_index + (1 | lad22nm), 
+                   data = master_london_sf)
+
+summary(lme_results)
+```
+Once borough-level context is accounted for, the squeeze index has a small but statistically significant association with fertility
+
+The "Squeeze" is Significant ($p = 0.000122$): Even though your city-wide correlation was nearly zero, the LME shows that the squeeze_index is a highly significant predictor of fertility. This proves that once you account for borough-level differences, the combined pressure of space and price does drive the birth rate.The Random Effects (Variance = 0.007): The variance at the borough level (lad22nm) is slightly higher than the residual variance (0.006). This confirms your ANOVA finding: "Where" you are in London (Borough) is just as important as the physical "Squeeze" of your flat.The Positive Estimate ($9.932e-03$): Note that your estimate is positive. This means in this specific model iteration, higher index scores correlate with higher fertility. You should double-check the "direction" of your PCA rotation to see if "higher index" actually means "less squeeze".
+
+While a composite housing “squeeze” index combining dwelling size and housing cost shows little direct association with fertility at the city-wide level, mixed-effects modelling reveals a small but statistically significant relationship once borough-level context is accounted for. This suggests that housing pressures influence fertility in a spatially contingent manner, operating differently across local contexts rather than uniformly across London.
+
+LME finale
+```{r}
+library(lme4)
+library(lmerTest)
+
+# The Big One: Predicting fertility using our PCA 'Squeeze' Index
+# We use Borough as a random effect to account for regional differences
+lme_final <- lmer(log_fertility ~ squeeze_index + (1 | lad22nm), 
+                  data = master_london_sf)
+
+# Print results
+summary(lme_final)
+```
+```{r}
+library(lme4)
+library(lmerTest)  # Needed for p-values
+
+lmer(log_fertility ~ squeeze_index + (squeeze_index | lad22nm), data = master_london_sf)
+```
+
+
+LME Performance check VV
+```{r}
+library(performance)
+library(see)
+library(ggplot2)
+library(showtext)
+
+# Font (same as your other figures)
+font_add_google("IBM Plex Sans", "plex")
+showtext_auto()
+showtext_opts(dpi = 300)   # <-- CRITICAL for correct export scaling
+
+# 1) Build diagnostic panel
+diag_plots <- check_model(lme_final, title = "Mixed-effects model diagnostic")
+
+# 2) Convert to a ggplot object and style it
+p_lme <- plot(diag_plots) +
+  theme_minimal(base_family = "plex", base_size = 11) +
+  theme(
+    plot.title = element_text(face = "bold", size = 18, margin = margin(b = 10)),
+    strip.text = element_text(face = "bold", size = 10),
+    axis.title = element_text(size = 10),
+    axis.text = element_text(size = 9, color = "grey30"),
+    panel.grid.minor = element_blank(),
+    panel.grid.major.x = element_blank(),
+    legend.position = "bottom"
+  )
+
+p_lme
+
+# 3) Save the actual styled plot (THIS is the key)
+ggsave("LME_Health_Check.png", plot = p_lme, width = 14, height = 10, dpi = 300)
+```
+
+
+Clustering of fertility VV
+```{r}
+library(tmap)
+library(sf)
+library(dplyr)
+
+tmap_mode("plot")
+
+# Reproject once
+master_london_sf <- st_transform(master_london_sf, 3857)
+london <- st_transform(london, 3857)
+borough <- st_transform(borough, 3857)
+
+m <- tm_basemap("CartoDB.PositronNoLabels") +
+
+  tm_shape(master_london_sf) +
+  tm_fill(
+    col = "log_fertility",
+    palette = "-viridis",
+    style = "cont",
+    midpoint = median(master_london_sf$log_fertility, na.rm = TRUE),
+    stretch.palette = TRUE,
+    title = "Log fertility rate",
+    alpha = 0.85
+  ) +
+
+  tm_borders(col = "#F7F7F7", lwd = 0.45) +
+
+  tm_shape(top100_msoa) +
+  tm_borders(col = "#7A1F2B", lwd = 1) +
+
+  tm_shape(borough) +
+  tm_borders(col = "grey20", lwd = 0.9) +
+  tm_text(
+    "NAME_wrapped",
+    size = 0.6,
+    col = "black",
+    fontface = "bold",
+    case = "upper",
+    bg.color = "white",
+    bg.alpha = 1,
+    bg.width = 0.6,
+    bg.height = 0.6
+  ) +
+
+  tm_shape(london) +
+  tm_borders(col = "navy", lwd = 3) +
+
+  tm_layout(
+    fontfamily = "sans",
+    fontsize = 1.6,
+
+    title = "Spatial Concentration of Birth Rates Across London",
+    title.position = c("left", "top"),
+    title.size = 1.2,
+    title.fontface = "bold",
+    title.bg.color = "white",
+    title.bg.alpha = 1,
+
+    legend.outside = FALSE,
+    legend.position = c("right", "bottom"),
+    legend.title.size = 0.9,
+    legend.text.size = 0.7,
+
+    frame = FALSE,
+    inner.margins = c(0.06, 0.02, 0.05, 0.02),
+    outer.margins = c(0.01, 0.01, 0.01, 0.01),
+    bg.color = "white"
+  ) +
+
+  tm_add_legend(
+    type = "line",
+    labels = "Top 100 MSOAs by fertility",
+    col = "#7A1F2B",
+    lwd = 2
+  )
+
+# Print map once
+m
+
+# Save
+tmap_save(m, "London_fertility_map.png",
+          width = 12, height = 10, units = "in", dpi = 300)
+
+tmap_save(m, "London_fertility_map.pdf",
+          width = 12, height = 10, units = "in")
+```
+
+
+Residuals map VV
+```{r}
+library(tmap)
+library(sf)
+
+tmap_mode("plot")
+
+# ---- Reproject ----
+master_london_sf <- st_transform(master_london_sf, 3857)
+borough <- st_transform(borough, 3857)
+london <- st_transform(london, 3857)
+
+# ---- Add residuals ----
+master_london_sf$residuals <- residuals(lme_final)
+
+# ---- Symmetric breaks around zero ----
+rmax <- max(abs(master_london_sf$residuals), na.rm = TRUE)
+breaks <- c(-rmax, -0.10, -0.05, -0.01, 0.01, 0.05, 0.10, rmax)
+
+# ---- Build map ----
+rs <- 
+  tm_basemap("CartoDB.PositronNoLabels") +  # cleaner backdrop
+
+  tm_shape(master_london_sf) +
+  tm_fill(
+    col = "residuals",
+    palette = "-RdBu",  # red = higher than predicted
+    style = "fixed",
+    breaks = breaks,
+    midpoint = 0,
+    title = "Model Residuals",
+    colorNA = "grey",
+    textNA = "Missing",
+    alpha = 0.75
+  ) +
+  
+  tm_borders(col = "#F7F7F7", lwd = 0.45) +
+  
+  tm_shape(top100_msoa) + 
+  tm_borders(col = "blue", lwd = 1) + 
+
+  tm_shape(borough) +
+  tm_borders(col = "grey20", lwd = 0.9) +
+  tm_text(
+    "NAME_wrapped",
+    size = 0.6,
+    col = "black",
+    fontface = "bold",
+    case = "upper",
+    bg.color = "white",
+    bg.alpha = 1,
+    bg.width = 0.6,   # tighten horizontal padding
+    bg.height = 0.6   # tighten vertical padding
+  ) +
+  
+  tm_shape(london) +
+  tm_borders(col = "navy", lwd = 3) +
+  
+  tm_layout(
+    fontfamily = "sans",
+    fontsize = 1.6,
+
+    title = "Spatial Pattern of Model Residuals",
+    title.position = c("left", "top"),
+    title.size = 1.2,
+    title.fontface = "bold",
+    title.bg.color = "white",       # Wipeout effect
+    title.bg.alpha = 1,
+
+    legend.outside = FALSE,
+    legend.position = c("right", "bottom"),
+    legend.title.size = 0.9,
+    legend.text.size = 0.7,
+
+    frame = FALSE,
+    inner.margins = c(0.06, 0.02, 0.05, 0.02),
+    outer.margins = c(0.01, 0.01, 0.01, 0.01),
+    bg.color = "white"
+  ) +
+  
+  tm_add_legend(
+    type = "line",
+    labels = "Top 100 MSOAs by fertility",
+    col = "darkblue",
+    lwd = 2
+  ) +
+  
+  tm_credits(
+    "Higher than predicted births · Blue = Lower than predicted",
+    position = c("left", "bottom"),
+    size = 0.85,
+    color = "grey40"
+  )
+
+# ---- Render ----
+rs
+
+# ---- Export ----
+tmap_save(rs, "London_LME_residuals_map.png", width = 12, height = 10, units = "in", dpi = 300)
+tmap_save(rs, "London_LME_residuals_map.pdf", width = 12, height = 10, units = "in")
+```
+
+
+Housing profile index + top 100 fertility VV
+```{r}
+library(tmap)
+library(sf)
+library(dplyr)
+
+tmap_mode("plot")
+
+# ---- Reproject ----
+master_london_sf <- st_transform(master_london_sf, 3857)
+london <- st_transform(london, 3857)
+borough <- st_transform(borough, 3857)
+
+# ---- Build Housing Portfolio Index ----
+master_london_sf <- master_london_sf %>%
+  mutate(
+    z_cost  = as.numeric(scale(log_housing_cost)),
+    z_small = as.numeric(scale(logit_small_dwellings)),
+    housing_portfolio_index = (z_cost + z_small) / 2,
+    hpi_0_100 = 100 * (housing_portfolio_index - min(housing_portfolio_index, na.rm = TRUE)) /
+      (max(housing_portfolio_index, na.rm = TRUE) - min(housing_portfolio_index, na.rm = TRUE))
+  )
+
+# ---- Top 100 MSOAs by fertility ----
+top100_msoa <- master_london_sf %>%
+  arrange(desc(log_fertility)) %>%
+  slice(1:100)
+
+# ---- Map ----
+m_hpi <- 
+  tm_basemap("CartoDB.PositronNoLabels") +
+
+  tm_shape(master_london_sf) +
+  tm_fill(
+    col = "hpi_0_100",
+    palette = "magma",
+    style = "cont",
+    title = "Housing Portfolio Index (0–100)",
+    alpha = 0.88,
+    colorNA = "grey90",
+    textNA = "Missing"
+  ) +
+  tm_borders(col = "#F7F7F7", lwd = 0.45) +
+  
+  tm_shape(top100_msoa) + 
+  tm_borders(col = "blue", lwd = 1) + 
+
+  tm_shape(borough) +
+  tm_borders(col = "grey20", lwd = 0.9) +
+  tm_text(
+    "NAME_wrapped",
+    size = 0.6,
+    col = "black",
+    fontface = "bold",
+    case = "upper",
+    bg.color = "white",
+    bg.alpha = 1,
+    bg.width = 0.6,   # tighten horizontal padding
+    bg.height = 0.6   # tighten vertical padding
+  ) +
+  
+  tm_shape(london) +
+  tm_borders(col = "navy", lwd = 3) +
+  
+  tm_layout(
+    fontfamily = "sans",
+    fontsize = 1.6,
+
+    title = "HPI = Housing constraints across London and where births remain highest",
+    title.position = c("left", "top"),
+    title.size = 1.2,
+    title.fontface = "bold",
+    title.bg.color = "white",       # Wipeout effect
+    title.bg.alpha = 1,
+
+    legend.outside = FALSE,
+    legend.position = c("right", "bottom"),
+    legend.title.size = 0.9,
+    legend.text.size = 0.7,
+
+    frame = FALSE,
+    inner.margins = c(0.06, 0.02, 0.05, 0.02),
+    outer.margins = c(0.01, 0.01, 0.01, 0.01),
+    bg.color = "white"
+  ) +
+  
+  tm_add_legend(
+    type = "line",
+    labels = "Top 100 MSOAs by fertility",
+    col = "darkblue",
+    lwd = 2
+  ) +
+  
+  tm_credits(
+    "HPI = Index combines housing-cost pressure and the concentration of smaller dwellings at MSOA level (standardised).",
+    position = c("left", "bottom"),
+    size = 0.85,
+    color = "grey40"
+  )
+  
+  
+m_hpi
+
+tmap_save(m_hpi, "HPI_top100.png",
+          width = 12, height = 10, units = "in", dpi = 300)
+
+tmap_save(m_hpi, "HPI_top100.pdf",
+          width = 12, height = 10, units = "in")
+
+```
+
+Diagram do it in illus
+```{r}
+library(DiagrammeR)
+
+grViz("
+digraph housing_fertility {
+  node [shape = box, style = filled, fillcolor = lightgrey]
+  HPI [label = 'Housing Profile Index\\n(Space + Cost)']
+  Context [label = 'Spatial Context\\n(Borough-level variation)']
+  Fertility [label = 'Fertility Rate\\n(Births per 1,000 women)']
+  Clusters [label = '3 Housing–Fertility Profiles']
+
+  HPI -> Fertility
+  HPI -> Context
+  Context -> Fertility
+  Fertility -> Clusters
+}
+")
+```
+
+
+```{r}
+library(tmap)
+library(sf)
+library(dplyr)
+library(stringr)
+library(grid)
+
+# --- 1. DATA PREPARATION & TYPOLOGY ---
+
+fert_q <- quantile(master_london_sf$log_fertility, probs = c(0.25, 0.75), na.rm = TRUE)
+index_q <- quantile(master_london_sf$housing_portfolio_index, probs = c(0.25, 0.75), na.rm = TRUE)
+
+master_london_sf <- master_london_sf %>%
+  mutate(
+    fertility_level = case_when(
+      log_fertility >= fert_q[2] ~ "High",
+      log_fertility <= fert_q[1] ~ "Low",
+      TRUE ~ "Middle"
+    ),
+    index_level = case_when(
+      housing_portfolio_index >= index_q[2] ~ "High Constraint",
+      housing_portfolio_index <= index_q[1] ~ "Low Constraint",
+      TRUE ~ "Middle"
+    ),
+    
+    # NEW TYPOLOGY (Mixed/Intermediary removed)
+    typology = case_when(
+      fertility_level == "High" & index_level == "High Constraint" ~ "Resilient Growth",
+      fertility_level == "Low"  & index_level == "High Constraint" ~ "Constrained Decline",
+      fertility_level == "High" & index_level == "Low Constraint"  ~ "Optimal Growth",
+      fertility_level == "Low"  & index_level == "Low Constraint"  ~ "Stagnant Space",
+      TRUE ~ NA_character_
+    )
+  )
+
+# Keep ALL polygons (including NA)
+master_london_sf_clean <- master_london_sf
+
+# Wrap borough names
+borough <- borough %>%
+  mutate(NAME_wrapped = str_replace_all(NAME, " ", "\n"))
+
+# --- 2. COLOR PALETTE ---
+
+typo_colors <- c(
+  "Resilient Growth"    = "#D90166",
+  "Optimal Growth"      = "#FF99BE",
+  "Constrained Decline" = "#33539E",
+  "Stagnant Space"      = "#7FACD6"
+)
+
+# --- 3. TRANSFORM CRS ---
+
+master_london_sf_clean <- st_transform(master_london_sf_clean, 3857)
+london <- st_transform(london, 3857)
+borough <- st_transform(borough, 3857)
+
+# --- 4. MAP ---
+
+tmap_mode("plot")
+
+clust_map <- tm_basemap("CartoDB.PositronNoLabels") +
+  tm_shape(master_london_sf_clean) +
+  tm_fill(
+    col = "typology",
+    palette = typo_colors,
+    alpha = 0.8,
+    title = "Housing-Fertility Typology",
+    colorNA = "transparent",
+    showNA = FALSE
+  ) +
+  tm_borders(col = "white", lwd = 0.6) +
+  
+  tm_shape(borough) +
+  tm_borders(col = "grey20", lwd = 0.9) +
+  tm_text(
+    "NAME_wrapped",
+    size = 0.6,
+    col = "black",
+    fontface = "bold",
+    case = "upper",
+    bg.color = "white",
+    bg.alpha = 1,
+    bg.width = 0.6,
+    bg.height = 0.6
+  ) +
+
+  tm_shape(london) +
+  tm_borders(col = "navy", lwd = 3) +
+
+  tm_layout(
+    fontfamily = "sans",
+    fontsize = 1.6,
+
+    title = "London Housing Profile Index (HPI) vs. Fertility",
+    title.position = c("left", "top"),
+    title.size = 1.2,
+    title.fontface = "bold",
+    title.bg.color = "white",
+    title.bg.alpha = 1,
+
+    legend.outside = FALSE,
+    legend.position = c("right", "bottom"),
+    legend.title.size = 0.9,
+    legend.text.size = 0.7,
+
+    frame = FALSE,
+    inner.margins = c(0.06, 0.02, 0.05, 0.02),
+    outer.margins = c(0.01, 0.01, 0.01, 0.01),
+    bg.color = "white"
+  ) +
+
+  tm_credits(
+    "HPI = Index combines housing-cost pressure and the concentration of smaller dwellings at MSOA level (standardised).",
+    position = c("left", "bottom"),
+    size = 0.85,
+    color = "grey40"
+  )
+
+clust_map
+
+tmap_save(clust_map, "London_HousingPortfolioIndex_top100.png",
+          width = 12, height = 10, units = "in", dpi = 300)
+
+tmap_save(clust_map, "London_HousingPortfolioIndex_top100.pdf",
+          width = 12, height = 10, units = "in")
+```
+
+
+
+
+```{r}
+table(master_london_sf$typology, useNA = "no")
+```
+
+```{r}
+master_london_sf %>%
+  filter(typology == "Resilient Growth") %>%
+  count(lad22nm, sort = TRUE)
+
+```
+```{r}
+master_london_sf %>%
+  filter(typology == "Optimal Growth") %>%
+  count(lad22nm, sort = TRUE)
+```
+
+```{r}
+master_london_sf %>%
+  filter(typology == "Stagnant Space") %>%
+  count(lad22nm, sort = TRUE)
+
+```
+
+```{r}
+master_london_sf %>%
+  filter(typology == "Constrained Decline") %>%
+  count(lad22nm, sort = TRUE)
+```
+
+
+
+```{r}
+outlier_ids <- c(344, 347, 185, 189)
+suspects <- master_london_sf[outlier_ids, ]
+```
+
+```{r}
+suspects %>% select(lad22nm, log_fertility, squeeze_index)
+```
+
+```{r}
+tm_shape(suspects) +
+tm_symbols(col = "red", size = 0.5)
+```
+
+
+

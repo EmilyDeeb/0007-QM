@@ -211,3 +211,17 @@ __marimo__/
 /Finale Assesment/shp/
 /Finale Assesment/rosm.cache/
 /Finale Assesment/QM_Code_files/
+
+
+# Spreadsheets & tabular data
+*.csv
+*.xls
+*.xlsx
+
+# Documents
+*.doc
+*.docx
+
+# R workspace & saved objects
+*.RData
+*.rdata

@@ -1,0 +1,2557 @@
+% Options for packages loaded elsewhere
+\PassOptionsToPackage{unicode}{hyperref}
+\PassOptionsToPackage{hyphens}{url}
+\documentclass[
+]{article}
+\usepackage{xcolor}
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath,amssymb}
+\setcounter{secnumdepth}{-\maxdimen} % remove section numbering
+\usepackage{iftex}
+\ifPDFTeX
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+  \usepackage{textcomp} % provide euro and other symbols
+\else % if luatex or xetex
+  \usepackage{unicode-math} % this also loads fontspec
+  \defaultfontfeatures{Scale=MatchLowercase}
+  \defaultfontfeatures[\rmfamily]{Ligatures=TeX,Scale=1}
+\fi
+\usepackage{lmodern}
+\ifPDFTeX\else
+  % xetex/luatex font selection
+\fi
+% Use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+\IfFileExists{microtype.sty}{% use microtype if available
+  \usepackage[]{microtype}
+  \UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\makeatletter
+\@ifundefined{KOMAClassName}{% if non-KOMA class
+  \IfFileExists{parskip.sty}{%
+    \usepackage{parskip}
+  }{% else
+    \setlength{\parindent}{0pt}
+    \setlength{\parskip}{6pt plus 2pt minus 1pt}}
+}{% if KOMA class
+  \KOMAoptions{parskip=half}}
+\makeatother
+\usepackage{color}
+\usepackage{fancyvrb}
+\newcommand{\VerbBar}{|}
+\newcommand{\VERB}{\Verb[commandchars=\\\{\}]}
+\DefineVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\}}
+% Add ',fontsize=\small' for more characters per line
+\usepackage{framed}
+\definecolor{shadecolor}{RGB}{248,248,248}
+\newenvironment{Shaded}{\begin{snugshade}}{\end{snugshade}}
+\newcommand{\AlertTok}[1]{\textcolor[rgb]{0.94,0.16,0.16}{#1}}
+\newcommand{\AnnotationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\AttributeTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{#1}}
+\newcommand{\BaseNTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\BuiltInTok}[1]{#1}
+\newcommand{\CharTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\CommentTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\CommentVarTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\ConstantTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{#1}}
+\newcommand{\ControlFlowTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\DataTypeTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{#1}}
+\newcommand{\DecValTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\DocumentationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\ErrorTok}[1]{\textcolor[rgb]{0.64,0.00,0.00}{\textbf{#1}}}
+\newcommand{\ExtensionTok}[1]{#1}
+\newcommand{\FloatTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\FunctionTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\ImportTok}[1]{#1}
+\newcommand{\InformationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\KeywordTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\NormalTok}[1]{#1}
+\newcommand{\OperatorTok}[1]{\textcolor[rgb]{0.81,0.36,0.00}{\textbf{#1}}}
+\newcommand{\OtherTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{#1}}
+\newcommand{\PreprocessorTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\RegionMarkerTok}[1]{#1}
+\newcommand{\SpecialCharTok}[1]{\textcolor[rgb]{0.81,0.36,0.00}{\textbf{#1}}}
+\newcommand{\SpecialStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\StringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\VariableTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\VerbatimStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\WarningTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\usepackage{graphicx}
+\makeatletter
+\newsavebox\pandoc@box
+\newcommand*\pandocbounded[1]{% scales image to fit in text height/width
+  \sbox\pandoc@box{#1}%
+  \Gscale@div\@tempa{\textheight}{\dimexpr\ht\pandoc@box+\dp\pandoc@box\relax}%
+  \Gscale@div\@tempb{\linewidth}{\wd\pandoc@box}%
+  \ifdim\@tempb\p@<\@tempa\p@\let\@tempa\@tempb\fi% select the smaller of both
+  \ifdim\@tempa\p@<\p@\scalebox{\@tempa}{\usebox\pandoc@box}%
+  \else\usebox{\pandoc@box}%
+  \fi%
+}
+% Set default figure placement to htbp
+\def\fps@figure{htbp}
+\makeatother
+\setlength{\emergencystretch}{3em} % prevent overfull lines
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\usepackage{bookmark}
+\IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
+\urlstyle{same}
+\hypersetup{
+  pdftitle={QM\_Code},
+  hidelinks,
+  pdfcreator={LaTeX via pandoc}}
+
+\title{QM\_Code}
+\author{}
+\date{\vspace{-2.5em}2026-01-05}
+
+\begin{document}
+\maketitle
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  Data Wrangling
+\end{enumerate}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Load Required libraries}
+\FunctionTok{library}\NormalTok{(sf)              }\CommentTok{\# modern spatial vector data (points/lines/polygons, CRS, spatial ops)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Linking to GEOS 3.13.1, GDAL 3.11.0, PROJ 9.6.0; sf_use_s2() is TRUE
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{library}\NormalTok{(tidyverse)       }\CommentTok{\# core data wrangling + plotting (dplyr, readr, tibble, etc.)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## -- Attaching core tidyverse packages ------------------------ tidyverse 2.0.0 --
+## v dplyr     1.1.4     v readr     2.1.5
+## v forcats   1.0.1     v stringr   1.5.2
+## v ggplot2   4.0.0     v tibble    3.3.0
+## v lubridate 1.9.4     v tidyr     1.3.1
+## v purrr     1.1.0
+\end{verbatim}
+
+\begin{verbatim}
+## -- Conflicts ------------------------------------------ tidyverse_conflicts() --
+## x dplyr::filter() masks stats::filter()
+## x dplyr::lag()    masks stats::lag()
+## i Use the conflicted package (<http://conflicted.r-lib.org/>) to force all conflicts to become errors
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{library}\NormalTok{(tmap)            }\CommentTok{\# thematic mapping for sf/raster (static + interactive maps)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Warning: package 'tmap' was built under R version 4.5.2
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{library}\NormalTok{(tmaptools)       }\CommentTok{\# helper tools for tmap (basemaps, geocoding, bbox utilities)}
+\FunctionTok{library}\NormalTok{(janitor)         }\CommentTok{\# quick data cleaning (clean\_names, tabulations, etc.)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## 
+## Attaching package: 'janitor'
+## 
+## The following objects are masked from 'package:stats':
+## 
+##     chisq.test, fisher.test
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{library}\NormalTok{(stringr)         }\CommentTok{\# string/text handling (str\_detect, str\_replace, regex work)}
+\FunctionTok{library}\NormalTok{(here)            }\CommentTok{\# safe, project{-}root{-}based file paths (here("data", "file.csv"))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## here() starts at C:/Users/emily/OneDrive/Desktop/CASA_MSc_Desktop/MSc_Term01/0007-QM/Finale Assesment
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{library}\NormalTok{(raster)          }\CommentTok{\# older raster package (still used, but being replaced by terra)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Loading required package: sp
+## 
+## Attaching package: 'raster'
+## 
+## The following object is masked from 'package:dplyr':
+## 
+##     select
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{library}\NormalTok{(terra)           }\CommentTok{\# modern fast raster + vector grids (rast, crop, mask, project)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Warning: package 'terra' was built under R version 4.5.2
+\end{verbatim}
+
+\begin{verbatim}
+## terra 1.8.86
+## 
+## Attaching package: 'terra'
+## 
+## The following object is masked from 'package:janitor':
+## 
+##     crosstab
+## 
+## The following object is masked from 'package:tidyr':
+## 
+##     extract
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{library}\NormalTok{(classInt)        }\CommentTok{\# create class breaks for choropleths (jenks, quantiles, etc.)}
+\FunctionTok{library}\NormalTok{(ggplot2)         }\CommentTok{\# general plotting (histograms, violins, geom\_sf, etc.)}
+\FunctionTok{library}\NormalTok{(grid)            }\CommentTok{\# low{-}level graphics; used for custom layout and insets}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## 
+## Attaching package: 'grid'
+## 
+## The following object is masked from 'package:terra':
+## 
+##     depth
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{library}\NormalTok{(spatstat)        }\CommentTok{\# point pattern analysis (ppp, Ripley’s K, quadrats, KDE)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Warning: package 'spatstat' was built under R version 4.5.2
+\end{verbatim}
+
+\begin{verbatim}
+## Loading required package: spatstat.data
+\end{verbatim}
+
+\begin{verbatim}
+## Warning: package 'spatstat.data' was built under R version 4.5.2
+\end{verbatim}
+
+\begin{verbatim}
+## Loading required package: spatstat.univar
+\end{verbatim}
+
+\begin{verbatim}
+## Warning: package 'spatstat.univar' was built under R version 4.5.2
+\end{verbatim}
+
+\begin{verbatim}
+## spatstat.univar 3.1-4
+## Loading required package: spatstat.geom
+\end{verbatim}
+
+\begin{verbatim}
+## Warning: package 'spatstat.geom' was built under R version 4.5.2
+\end{verbatim}
+
+\begin{verbatim}
+## spatstat.geom 3.6-0
+## 
+## Attaching package: 'spatstat.geom'
+## 
+## The following object is masked from 'package:grid':
+## 
+##     as.mask
+## 
+## The following objects are masked from 'package:terra':
+## 
+##     area, delaunay, is.empty, rescale, rotate, shift, where.max,
+##     where.min
+## 
+## The following objects are masked from 'package:raster':
+## 
+##     area, rotate, shift
+## 
+## Loading required package: spatstat.random
+\end{verbatim}
+
+\begin{verbatim}
+## Warning: package 'spatstat.random' was built under R version 4.5.2
+\end{verbatim}
+
+\begin{verbatim}
+## spatstat.random 3.4-2
+## Loading required package: spatstat.explore
+\end{verbatim}
+
+\begin{verbatim}
+## Warning: package 'spatstat.explore' was built under R version 4.5.2
+\end{verbatim}
+
+\begin{verbatim}
+## Loading required package: nlme
+## 
+## Attaching package: 'nlme'
+## 
+## The following object is masked from 'package:raster':
+## 
+##     getData
+## 
+## The following object is masked from 'package:dplyr':
+## 
+##     collapse
+## 
+## spatstat.explore 3.5-3
+## Loading required package: spatstat.model
+\end{verbatim}
+
+\begin{verbatim}
+## Warning: package 'spatstat.model' was built under R version 4.5.2
+\end{verbatim}
+
+\begin{verbatim}
+## Loading required package: rpart
+## spatstat.model 3.4-2
+## Loading required package: spatstat.linnet
+\end{verbatim}
+
+\begin{verbatim}
+## Warning: package 'spatstat.linnet' was built under R version 4.5.2
+\end{verbatim}
+
+\begin{verbatim}
+## spatstat.linnet 3.3-2
+## 
+## spatstat 3.4-1 
+## For an introduction to spatstat, type 'beginner'
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{library}\NormalTok{(fpc)             }\CommentTok{\# clustering methods; here for DBSCAN on point coords}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Warning: package 'fpc' was built under R version 4.5.2
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{library}\NormalTok{(ggspatial)       }\CommentTok{\# spatial helpers for ggplot (basemaps, north arrow, scalebar)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Warning: package 'ggspatial' was built under R version 4.5.2
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{library}\NormalTok{(colorblindcheck) }\CommentTok{\# check palettes for colour{-}blind accessibility}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Warning: package 'colorblindcheck' was built under R version 4.5.2
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{library}\NormalTok{(cols4all)        }\CommentTok{\# big palette collection + GUI for choosing colour schemes}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Warning: package 'cols4all' was built under R version 4.5.2
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{library}\NormalTok{(plotly)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## 
+## Attaching package: 'plotly'
+## 
+## The following object is masked from 'package:raster':
+## 
+##     select
+## 
+## The following object is masked from 'package:ggplot2':
+## 
+##     last_plot
+## 
+## The following object is masked from 'package:stats':
+## 
+##     filter
+## 
+## The following object is masked from 'package:graphics':
+## 
+##     layout
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{library}\NormalTok{(rJava)}
+\FunctionTok{library}\NormalTok{(OpenStreetMap)}
+\end{Highlighting}
+\end{Shaded}
+
+\textbf{Data Wrangling:} We are Going to prepare ready files to merge on
+the MSOA scale. then filter by intersect only For London
+
+\textbf{1. Births File:} - Births File - Turn to CSV - Select Sheet
+Named 2 - Remove first 5 Rows - Filter Period only to the last 2 years
+for a larger sample 2019 - 2020 / 2020 - 2021. we selected these years
+as we wanted a larger sample - Group by area regardless of year. - do a
+sum column
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# 1) Read CSV file and skip first 5 rows }
+\NormalTok{births\_raw }\OtherTok{\textless{}{-}} \FunctionTok{read\_csv}\NormalTok{(here}\SpecialCharTok{::}\FunctionTok{here}\NormalTok{(}\StringTok{"data"}\NormalTok{, }\StringTok{"Births.csv"}\NormalTok{),}
+                       \AttributeTok{locale =} \FunctionTok{locale}\NormalTok{(}\AttributeTok{encoding =} \StringTok{"latin1"}\NormalTok{),}
+                       \AttributeTok{na =} \StringTok{" "}\NormalTok{, }\AttributeTok{skip=}\DecValTok{5}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Rows: 145260 Columns: 9
+## -- Column specification --------------------------------------------------------
+## Delimiter: ","
+## chr (2): Period, MSOA 2021 code
+## dbl (7): 19 and under, 20-24, 25-29, 30-34, 35-39, 40-44, 45 and over
+## 
+## i Use `spec()` to retrieve the full column specification for this data.
+## i Specify the column types or set `show_col_types = FALSE` to quiet this message.
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# 2) Periods we want to keep }
+\NormalTok{keep\_periods }\OtherTok{\textless{}{-}} \FunctionTok{c}\NormalTok{(}
+  \StringTok{"2019{-}2020"}\NormalTok{,}\StringTok{"2020{-}2021"}\NormalTok{)}
+
+\CommentTok{\# 3) Clean column names (optional but highly recommended)}
+\NormalTok{births }\OtherTok{\textless{}{-}}\NormalTok{ births\_raw }\SpecialCharTok{\%\textgreater{}\%}
+\NormalTok{  janitor}\SpecialCharTok{::}\FunctionTok{clean\_names}\NormalTok{() }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{mutate}\NormalTok{(}\AttributeTok{period =}\NormalTok{ stringr}\SpecialCharTok{::}\FunctionTok{str\_trim}\NormalTok{(period))  }\CommentTok{\# in case there are sneaky spaces}
+
+\CommentTok{\# 4) Filter to the last periods, then group by area (MSOA), summing all age columns}
+\NormalTok{births\_msoa\_sum }\OtherTok{\textless{}{-}}\NormalTok{ births }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{filter}\NormalTok{(period }\SpecialCharTok{\%in\%}\NormalTok{ keep\_periods) }\SpecialCharTok{\%\textgreater{}\%}
+  
+  \FunctionTok{group\_by}\NormalTok{(msoa\_2021\_code) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{summarise}\NormalTok{(}
+    \FunctionTok{across}\NormalTok{(}
+      \FunctionTok{c}\NormalTok{(}\StringTok{\textasciigrave{}}\AttributeTok{x19\_and\_under}\StringTok{\textasciigrave{}}\NormalTok{, }\StringTok{\textasciigrave{}}\AttributeTok{x20\_24}\StringTok{\textasciigrave{}}\NormalTok{, }\StringTok{\textasciigrave{}}\AttributeTok{x25\_29}\StringTok{\textasciigrave{}}\NormalTok{, }\StringTok{\textasciigrave{}}\AttributeTok{x30\_34}\StringTok{\textasciigrave{}}\NormalTok{, }\StringTok{\textasciigrave{}}\AttributeTok{x35\_39}\StringTok{\textasciigrave{}}\NormalTok{, }\StringTok{\textasciigrave{}}\AttributeTok{x40\_44}\StringTok{\textasciigrave{}}\NormalTok{, }\StringTok{\textasciigrave{}}\AttributeTok{x45\_and\_over}\StringTok{\textasciigrave{}}\NormalTok{),}
+      \SpecialCharTok{\textasciitilde{}} \FunctionTok{sum}\NormalTok{(.x, }\AttributeTok{na.rm =} \ConstantTok{TRUE}\NormalTok{)}
+\NormalTok{    ),}
+    \AttributeTok{.groups =} \StringTok{"drop"}
+\NormalTok{  ) }\SpecialCharTok{\%\textgreater{}\%}
+  
+  \CommentTok{\# 5) Add a total births column across age groups}
+  \FunctionTok{mutate}\NormalTok{(}\AttributeTok{total\_births =} \FunctionTok{rowSums}\NormalTok{(}\FunctionTok{across}\NormalTok{(}\FunctionTok{c}\NormalTok{(}\StringTok{\textasciigrave{}}\AttributeTok{x19\_and\_under}\StringTok{\textasciigrave{}}\NormalTok{, }\StringTok{\textasciigrave{}}\AttributeTok{x20\_24}\StringTok{\textasciigrave{}}\NormalTok{, }\StringTok{\textasciigrave{}}\AttributeTok{x25\_29}\StringTok{\textasciigrave{}}\NormalTok{, }\StringTok{\textasciigrave{}}\AttributeTok{x30\_34}\StringTok{\textasciigrave{}}\NormalTok{, }\StringTok{\textasciigrave{}}\AttributeTok{x35\_39}\StringTok{\textasciigrave{}}\NormalTok{, }\StringTok{\textasciigrave{}}\AttributeTok{x40\_44}\StringTok{\textasciigrave{}}\NormalTok{, }\StringTok{\textasciigrave{}}\AttributeTok{x45\_and\_over}\StringTok{\textasciigrave{}}\NormalTok{)), }\AttributeTok{na.rm =} \ConstantTok{TRUE}\NormalTok{))}
+
+\NormalTok{births\_msoa\_sum}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## # A tibble: 7,264 x 9
+##    msoa_2021_code x19_and_under x20_24 x25_29 x30_34 x35_39 x40_44 x45_and_over
+##    <chr>                  <dbl>  <dbl>  <dbl>  <dbl>  <dbl>  <dbl>        <dbl>
+##  1 E02000001                  0      1     11     42     43      9            5
+##  2 E02000002                  5     30     67     78     40      8            3
+##  3 E02000003                 11     55     91    113     61     18            2
+##  4 E02000004                  1     19     49     58     23      6            2
+##  5 E02000005                 11     51     80    122     79     17            3
+##  6 E02000007                 12     47     89     91     55     16            0
+##  7 E02000008                 19     44     98    103     76     20            5
+##  8 E02000009                 12     49    102    117     80     20            1
+##  9 E02000010                  8     30     81     97     44     11            1
+## 10 E02000011                  4     39     53     67     33     13            1
+## # i 7,254 more rows
+## # i 1 more variable: total_births <dbl>
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# So now we have a table that has the last 2 years of births since 2019{-}2021 summed by MSOA}
+\CommentTok{\# later we have to aggregate for London boundry only. }
+\end{Highlighting}
+\end{Shaded}
+
+\textbf{2. Population by Age File:} - Read file - Skip the first 3 Rows
+- Clean janitor - Keep Columns MSOA 2021 Code / MSOA 2021 Name / Keep
+columns contaning F for female then keep ages of 15 till 55 - and group
+by \texttt{x19\_and\_under}, \texttt{x20\_24}, \texttt{x25\_29},
+\texttt{x30\_34}, \texttt{x35\_39}, \texttt{x40\_44},
+\texttt{x45\_and\_over} - then have total column
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# 1) Read CSV and clean columns for easier read}
+\NormalTok{pop\_raw }\OtherTok{\textless{}{-}} \FunctionTok{read\_csv}\NormalTok{(here}\SpecialCharTok{::}\FunctionTok{here}\NormalTok{(}\StringTok{"data"}\NormalTok{, }\StringTok{"Demographics\_Age.csv"}\NormalTok{),}
+                       \AttributeTok{locale =} \FunctionTok{locale}\NormalTok{(}\AttributeTok{encoding =} \StringTok{"latin1"}\NormalTok{),}
+                       \AttributeTok{na =} \StringTok{" "}\NormalTok{, }\AttributeTok{skip=}\DecValTok{3}\NormalTok{) }\SpecialCharTok{\%\textgreater{}\%}
+\NormalTok{  janitor}\SpecialCharTok{::}\FunctionTok{clean\_names}\NormalTok{()}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Warning: One or more parsing issues, call `problems()` on your data frame for details,
+## e.g.:
+##   dat <- vroom(...)
+##   problems(dat)
+\end{verbatim}
+
+\begin{verbatim}
+## Rows: 7264 Columns: 187
+## -- Column specification --------------------------------------------------------
+## Delimiter: ","
+## chr   (4): LAD 2023 Code, LAD 2023 Name, MSOA 2021 Code, MSOA 2021 Name
+## dbl (178): F0, F1, F2, F3, F4, F5, F6, F7, F8, F9, F10, F11, F12, F13, F14, ...
+## num   (5): Total, F19, F20, F21, M19
+## 
+## i Use `spec()` to retrieve the full column specification for this data.
+## i Specify the column types or set `show_col_types = FALSE` to quiet this message.
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# 2) Columns we wish to keep}
+\CommentTok{\# select and filter + detect with F }
+\NormalTok{pop\_f }\OtherTok{\textless{}{-}}\NormalTok{ pop\_raw }\SpecialCharTok{\%\textgreater{}\%} 
+  \FunctionTok{select}\NormalTok{(msoa\_2021\_code, msoa\_2021\_name, }\FunctionTok{matches}\NormalTok{(}\StringTok{"\^{}f}\SpecialCharTok{\textbackslash{}\textbackslash{}}\StringTok{d+$"}\NormalTok{)  }\CommentTok{\# keeps f0, f1, f2... etc}
+\NormalTok{  )}
+
+\CommentTok{\# 3) Group by age ranges same as birth ranges}
+\NormalTok{pop\_female\_grouped }\OtherTok{\textless{}{-}}\NormalTok{ pop\_f }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{mutate}\NormalTok{(}
+    \AttributeTok{f\_pop\_19\_and\_under =} \FunctionTok{rowSums}\NormalTok{(}\FunctionTok{select}\NormalTok{(., f15}\SpecialCharTok{:}\NormalTok{f19), }\AttributeTok{na.rm =} \ConstantTok{TRUE}\NormalTok{),}
+    \AttributeTok{f\_pop\_20\_24        =} \FunctionTok{rowSums}\NormalTok{(}\FunctionTok{select}\NormalTok{(., f20}\SpecialCharTok{:}\NormalTok{f24), }\AttributeTok{na.rm =} \ConstantTok{TRUE}\NormalTok{),}
+    \AttributeTok{f\_pop\_25\_29        =} \FunctionTok{rowSums}\NormalTok{(}\FunctionTok{select}\NormalTok{(., f25}\SpecialCharTok{:}\NormalTok{f29), }\AttributeTok{na.rm =} \ConstantTok{TRUE}\NormalTok{),}
+    \AttributeTok{f\_pop\_30\_34        =} \FunctionTok{rowSums}\NormalTok{(}\FunctionTok{select}\NormalTok{(., f30}\SpecialCharTok{:}\NormalTok{f34), }\AttributeTok{na.rm =} \ConstantTok{TRUE}\NormalTok{),}
+    \AttributeTok{f\_pop\_35\_39        =} \FunctionTok{rowSums}\NormalTok{(}\FunctionTok{select}\NormalTok{(., f35}\SpecialCharTok{:}\NormalTok{f39), }\AttributeTok{na.rm =} \ConstantTok{TRUE}\NormalTok{),}
+    \AttributeTok{f\_pop\_40\_44        =} \FunctionTok{rowSums}\NormalTok{(}\FunctionTok{select}\NormalTok{(., f40}\SpecialCharTok{:}\NormalTok{f44), }\AttributeTok{na.rm =} \ConstantTok{TRUE}\NormalTok{),}
+    \AttributeTok{f\_pop\_45\_and\_over  =} \FunctionTok{rowSums}\NormalTok{(}\FunctionTok{select}\NormalTok{(., f45}\SpecialCharTok{:}\NormalTok{f55), }\AttributeTok{na.rm =} \ConstantTok{TRUE}\NormalTok{)}
+\NormalTok{  ) }\SpecialCharTok{\%\textgreater{}\%} 
+  
+\CommentTok{\# 4) Keep only needed columns}
+  \FunctionTok{select}\NormalTok{(}
+\NormalTok{    msoa\_2021\_code,}
+\NormalTok{    msoa\_2021\_name,}
+    \FunctionTok{starts\_with}\NormalTok{(}\StringTok{"f\_pop\_"}\NormalTok{)}
+\NormalTok{  ) }\SpecialCharTok{\%\textgreater{}\%}
+  
+\CommentTok{\# 5) Total female population (15–55)}
+  \FunctionTok{mutate}\NormalTok{(}
+    \AttributeTok{f\_pop\_total =} \FunctionTok{rowSums}\NormalTok{(}\FunctionTok{across}\NormalTok{(}\FunctionTok{starts\_with}\NormalTok{(}\StringTok{"f\_pop\_"}\NormalTok{)), }\AttributeTok{na.rm =} \ConstantTok{TRUE}\NormalTok{)}
+\NormalTok{  )}
+
+\NormalTok{pop\_female\_grouped}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## # A tibble: 7,264 x 10
+##    msoa_2021_code msoa_2021_name f_pop_19_and_under f_pop_20_24 f_pop_25_29
+##    <chr>          <chr>                       <dbl>       <dbl>       <dbl>
+##  1 E02002483      Hartlepool 001                339         237         366
+##  2 E02002484      Hartlepool 002                379         306         380
+##  3 E02002485      Hartlepool 003                279         207         250
+##  4 E02002489      Hartlepool 007                271         345         223
+##  5 E02002490      Hartlepool 008                167         138         199
+##  6 E02002491      Hartlepool 009                218         175         211
+##  7 E02002492      Hartlepool 010                188         173         206
+##  8 E02002493      Hartlepool 011                163         123         189
+##  9 E02002494      Hartlepool 012                271         255         265
+## 10 E02006909      Hartlepool 014                356         249         348
+## # i 7,254 more rows
+## # i 5 more variables: f_pop_30_34 <dbl>, f_pop_35_39 <dbl>, f_pop_40_44 <dbl>,
+## #   f_pop_45_and_over <dbl>, f_pop_total <dbl>
+\end{verbatim}
+
+\textbf{3. Housing File:} - Read file CSV - Remove first 10 rows - clean
+names - filter geography that contain MSOA only - group the room count
+so we have total of 1 bedroom 2 bedroom and so on (remove not known and
+total column)
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# 1) Read CSV file and filter only for MSOA}
+\NormalTok{house\_raw }\OtherTok{\textless{}{-}} \FunctionTok{read\_csv}\NormalTok{(here}\SpecialCharTok{::}\FunctionTok{here}\NormalTok{(}\StringTok{"data"}\NormalTok{, }\StringTok{"Housing.csv"}\NormalTok{),}
+                       \AttributeTok{locale =} \FunctionTok{locale}\NormalTok{(}\AttributeTok{encoding =} \StringTok{"latin1"}\NormalTok{),}
+                       \AttributeTok{na =} \StringTok{" "}\NormalTok{, }\AttributeTok{skip=}\DecValTok{9}\NormalTok{) }\SpecialCharTok{\%\textgreater{}\%}
+\NormalTok{  janitor}\SpecialCharTok{::}\FunctionTok{clean\_names}\NormalTok{() }\SpecialCharTok{\%\textgreater{}\%} 
+  \FunctionTok{filter}\NormalTok{(geography3 }\SpecialCharTok{==} \StringTok{"MSOA"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## New names:
+## * `1` -> `1...4`
+## * `2` -> `2...5`
+## * `3` -> `3...6`
+## * `4+` -> `4+...7`
+## * `Not Known` -> `Not Known...8`
+## * `Total` -> `Total...9`
+## * `1` -> `1...10`
+## * `2` -> `2...11`
+## * `3` -> `3...12`
+## * `4+` -> `4+...13`
+## * `Not Known` -> `Not Known...14`
+## * `Total` -> `Total...15`
+## * `1` -> `1...16`
+## * `2` -> `2...17`
+## * `3` -> `3...18`
+## * `4+` -> `4+...19`
+## * `Not Known` -> `Not Known...20`
+## * `Total` -> `Total...21`
+## * `1` -> `1...22`
+## * `2` -> `2...23`
+## * `3` -> `3...24`
+## * `4+` -> `4+...25`
+## * `Not Known` -> `Not Known...26`
+## * `Total` -> `Total...27`
+## * `1` -> `1...28`
+## * `2` -> `2...29`
+## * `3` -> `3...30`
+## * `4+` -> `4+...31`
+## * `Not Known` -> `Not Known...32`
+## * `Total` -> `Total...33`
+## * `` -> `...34`
+## * `` -> `...35`
+## * `` -> `...36`
+## * `` -> `...37`
+## * `` -> `...38`
+## * `` -> `...39`
+## * `` -> `...40`
+## * `` -> `...41`
+## * `` -> `...42`
+## * `` -> `...43`
+## * `` -> `...44`
+## * `` -> `...45`
+## * `` -> `...46`
+## * `` -> `...47`
+## * `` -> `...48`
+## * `` -> `...49`
+## * `` -> `...50`
+## * `` -> `...51`
+\end{verbatim}
+
+\begin{verbatim}
+## Warning: One or more parsing issues, call `problems()` on your data frame for details,
+## e.g.:
+##   dat <- vroom(...)
+##   problems(dat)
+\end{verbatim}
+
+\begin{verbatim}
+## Rows: 5868 Columns: 51
+## -- Column specification --------------------------------------------------------
+## Delimiter: ","
+## chr (36): Geography3, Area Code4, Area, 1...4, 2...5, 3...6, 4+...7, Not Kno...
+## num  (1): ...37
+## lgl (14): ...38, ...39, ...40, ...41, ...42, ...43, ...44, ...45, ...46, ......
+## 
+## i Use `spec()` to retrieve the full column specification for this data.
+## i Specify the column types or set `show_col_types = FALSE` to quiet this message.
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# 2) change everything to numeric}
+\NormalTok{house\_raw }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{summarise}\NormalTok{(}\FunctionTok{across}\NormalTok{(}\FunctionTok{starts\_with}\NormalTok{(}\StringTok{"x"}\NormalTok{), }\SpecialCharTok{\textasciitilde{}} \FunctionTok{class}\NormalTok{(.x)[}\DecValTok{1}\NormalTok{])) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{pivot\_longer}\NormalTok{(}\FunctionTok{everything}\NormalTok{(), }\AttributeTok{names\_to =} \StringTok{"col"}\NormalTok{, }\AttributeTok{values\_to =} \StringTok{"class"}\NormalTok{) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{filter}\NormalTok{(class }\SpecialCharTok{!=} \StringTok{"numeric"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## # A tibble: 37 x 2
+##    col   class    
+##    <chr> <chr>    
+##  1 x1_4  character
+##  2 x2_5  character
+##  3 x3_6  character
+##  4 x4_7  character
+##  5 x1_10 character
+##  6 x2_11 character
+##  7 x3_12 character
+##  8 x4_13 character
+##  9 x1_16 character
+## 10 x2_17 character
+## # i 27 more rows
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{house\_clean }\OtherTok{\textless{}{-}}\NormalTok{ house\_raw }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{mutate}\NormalTok{(}\FunctionTok{across}\NormalTok{(}\FunctionTok{where}\NormalTok{(is.character), }\SpecialCharTok{\textasciitilde{}} \FunctionTok{na\_if}\NormalTok{(.x, }\StringTok{"{-}"}\NormalTok{))) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{mutate}\NormalTok{(}\FunctionTok{across}\NormalTok{(}\FunctionTok{starts\_with}\NormalTok{(}\StringTok{"x"}\NormalTok{), }
+                \SpecialCharTok{\textasciitilde{}} \ControlFlowTok{if}\NormalTok{ (}\FunctionTok{is.character}\NormalTok{(.x)) }\FunctionTok{parse\_number}\NormalTok{(.x) }\ControlFlowTok{else}\NormalTok{ .x))}
+
+\CommentTok{\# 3) Group Rooms and rename for easier read}
+
+\NormalTok{house }\OtherTok{\textless{}{-}}\NormalTok{ house\_clean }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{mutate}\NormalTok{(}
+    \StringTok{\textasciigrave{}}\AttributeTok{1bed}\StringTok{\textasciigrave{}} \OtherTok{=} \FunctionTok{rowSums}\NormalTok{(}\FunctionTok{across}\NormalTok{(}\FunctionTok{c}\NormalTok{(x1\_4, x1\_10, x1\_16, x1\_22, x1\_28)), }\AttributeTok{na.rm =} \ConstantTok{TRUE}\NormalTok{),}
+    \StringTok{\textasciigrave{}}\AttributeTok{2bed}\StringTok{\textasciigrave{}} \OtherTok{=} \FunctionTok{rowSums}\NormalTok{(}\FunctionTok{across}\NormalTok{(}\FunctionTok{c}\NormalTok{(x2\_5, x2\_11, x2\_17, x2\_23, x2\_29)), }\AttributeTok{na.rm =} \ConstantTok{TRUE}\NormalTok{),}
+    \StringTok{\textasciigrave{}}\AttributeTok{3bed}\StringTok{\textasciigrave{}} \OtherTok{=} \FunctionTok{rowSums}\NormalTok{(}\FunctionTok{across}\NormalTok{(}\FunctionTok{c}\NormalTok{(x3\_6, x3\_12, x3\_18, x3\_24, x3\_30)), }\AttributeTok{na.rm =} \ConstantTok{TRUE}\NormalTok{),}
+    \StringTok{\textasciigrave{}}\AttributeTok{4bed}\StringTok{\textasciigrave{}} \OtherTok{=} \FunctionTok{rowSums}\NormalTok{(}\FunctionTok{across}\NormalTok{(}\FunctionTok{c}\NormalTok{(x4\_7, x4\_13, x4\_19, x4\_25, x4\_31)), }\AttributeTok{na.rm =} \ConstantTok{TRUE}\NormalTok{)}
+\NormalTok{  ) }\SpecialCharTok{\%\textgreater{}\%}
+\CommentTok{\# 4) Select columns we need only }
+  \FunctionTok{select}\NormalTok{(area\_code4, }\StringTok{\textasciigrave{}}\AttributeTok{1bed}\StringTok{\textasciigrave{}}\SpecialCharTok{:}\StringTok{\textasciigrave{}}\AttributeTok{4bed}\StringTok{\textasciigrave{}}\NormalTok{) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{mutate}\NormalTok{(}
+    \AttributeTok{total\_above2 =} \FunctionTok{rowSums}\NormalTok{(}\FunctionTok{across}\NormalTok{(}\FunctionTok{c}\NormalTok{(}\StringTok{\textasciigrave{}}\AttributeTok{2bed}\StringTok{\textasciigrave{}}\NormalTok{, }\StringTok{\textasciigrave{}}\AttributeTok{3bed}\StringTok{\textasciigrave{}}\NormalTok{, }\StringTok{\textasciigrave{}}\AttributeTok{4bed}\StringTok{\textasciigrave{}}\NormalTok{)), }\AttributeTok{na.rm =} \ConstantTok{TRUE}\NormalTok{),}
+    \AttributeTok{total        =} \FunctionTok{rowSums}\NormalTok{(}\FunctionTok{across}\NormalTok{(}\FunctionTok{c}\NormalTok{(}\StringTok{\textasciigrave{}}\AttributeTok{1bed}\StringTok{\textasciigrave{}}\NormalTok{, }\StringTok{\textasciigrave{}}\AttributeTok{2bed}\StringTok{\textasciigrave{}}\NormalTok{, }\StringTok{\textasciigrave{}}\AttributeTok{3bed}\StringTok{\textasciigrave{}}\NormalTok{, }\StringTok{\textasciigrave{}}\AttributeTok{4bed}\StringTok{\textasciigrave{}}\NormalTok{)), }\AttributeTok{na.rm =} \ConstantTok{TRUE}\NormalTok{)}
+\NormalTok{  )}
+
+\CommentTok{\# 5) create calc of total houses over 2 bedroom and one bedroom with percenatege}
+\NormalTok{house }\OtherTok{\textless{}{-}}\NormalTok{ house }\SpecialCharTok{\%\textgreater{}\%} 
+    \FunctionTok{mutate}\NormalTok{(}
+    \AttributeTok{total\_above2 =} \FunctionTok{rowSums}\NormalTok{(}\FunctionTok{across}\NormalTok{(}\FunctionTok{c}\NormalTok{(}\StringTok{\textasciigrave{}}\AttributeTok{2bed}\StringTok{\textasciigrave{}}\NormalTok{, }\StringTok{\textasciigrave{}}\AttributeTok{3bed}\StringTok{\textasciigrave{}}\NormalTok{, }\StringTok{\textasciigrave{}}\AttributeTok{4bed}\StringTok{\textasciigrave{}}\NormalTok{)), }\AttributeTok{na.rm =} \ConstantTok{TRUE}\NormalTok{),}
+    \AttributeTok{total        =} \FunctionTok{rowSums}\NormalTok{(}\FunctionTok{across}\NormalTok{(}\FunctionTok{c}\NormalTok{(}\StringTok{\textasciigrave{}}\AttributeTok{1bed}\StringTok{\textasciigrave{}}\NormalTok{, }\StringTok{\textasciigrave{}}\AttributeTok{2bed}\StringTok{\textasciigrave{}}\NormalTok{, }\StringTok{\textasciigrave{}}\AttributeTok{3bed}\StringTok{\textasciigrave{}}\NormalTok{, }\StringTok{\textasciigrave{}}\AttributeTok{4bed}\StringTok{\textasciigrave{}}\NormalTok{)), }\AttributeTok{na.rm =} \ConstantTok{TRUE}\NormalTok{),}
+    \AttributeTok{pct\_above2 =}\NormalTok{ (total\_above2}\SpecialCharTok{/}\NormalTok{total),}
+    \AttributeTok{pct\_below2 =}\NormalTok{ (}\StringTok{\textasciigrave{}}\AttributeTok{1bed}\StringTok{\textasciigrave{}}\SpecialCharTok{/}\NormalTok{total)}
+\NormalTok{    )}
+\end{Highlighting}
+\end{Shaded}
+
+\textbf{4. Income File:} - Read file CSV - no need to remove rows -
+clean names - create column calac housing prices per MSOA
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# 1) Read CSV file and filter only for MSOA}
+\NormalTok{income\_raw }\OtherTok{\textless{}{-}} \FunctionTok{read\_csv}\NormalTok{(here}\SpecialCharTok{::}\FunctionTok{here}\NormalTok{(}\StringTok{"data"}\NormalTok{, }\StringTok{"Income.csv"}\NormalTok{),}
+                       \AttributeTok{locale =} \FunctionTok{locale}\NormalTok{(}\AttributeTok{encoding =} \StringTok{"latin1"}\NormalTok{),}
+                       \AttributeTok{na =} \StringTok{" "}\NormalTok{, }\AttributeTok{skip=}\DecValTok{0}\NormalTok{) }\SpecialCharTok{\%\textgreater{}\%}
+\NormalTok{  janitor}\SpecialCharTok{::}\FunctionTok{clean\_names}\NormalTok{() }\SpecialCharTok{\%\textgreater{}\%} 
+  \FunctionTok{rename}\NormalTok{(}\AttributeTok{income\_msoa =}\NormalTok{ areacd,}
+         \AttributeTok{net\_before =}\NormalTok{ disposable\_net\_annual\_income\_before\_housing\_costs\_thousands,}
+         \AttributeTok{net\_after =}\NormalTok{ disposable\_net\_annual\_income\_after\_housing\_costs\_thousands)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Rows: 7264 Columns: 3
+## -- Column specification --------------------------------------------------------
+## Delimiter: ","
+## chr (1): AREACD
+## dbl (2): Disposable (net) annual income before housing costs (£ thousands), ...
+## 
+## i Use `spec()` to retrieve the full column specification for this data.
+## i Specify the column types or set `show_col_types = FALSE` to quiet this message.
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\#2) Calc housing prices per MSOA avg}
+\NormalTok{income }\OtherTok{\textless{}{-}}\NormalTok{ income\_raw }\SpecialCharTok{\%\textgreater{}\%} 
+  \FunctionTok{mutate}\NormalTok{(}\AttributeTok{house\_price =}\NormalTok{ net\_before }\SpecialCharTok{{-}}\NormalTok{ net\_after)}
+\end{Highlighting}
+\end{Shaded}
+
+\textbf{Step Two: Master DATA FRAME with all variables (SHOCKING)}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Lets create one master data frame}
+\NormalTok{master\_df }\OtherTok{\textless{}{-}}\NormalTok{ pop\_female\_grouped }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{left\_join}\NormalTok{(births\_msoa\_sum, }\AttributeTok{by =} \StringTok{"msoa\_2021\_code"}\NormalTok{) }\SpecialCharTok{\%\textgreater{}\%} 
+  \FunctionTok{left\_join}\NormalTok{(income, }\AttributeTok{by =} \FunctionTok{c}\NormalTok{(}\StringTok{"msoa\_2021\_code"} \OtherTok{=} \StringTok{"income\_msoa"}\NormalTok{)) }\SpecialCharTok{\%\textgreater{}\%} 
+  \FunctionTok{left\_join}\NormalTok{(house, }\AttributeTok{by =} \FunctionTok{c}\NormalTok{(}\StringTok{"msoa\_2021\_code"} \OtherTok{=} \StringTok{"area\_code4"}\NormalTok{))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# lets rename columns}
+\NormalTok{master\_df }\OtherTok{\textless{}{-}}\NormalTok{ master\_df }\SpecialCharTok{\%\textgreater{}\%} 
+  \FunctionTok{rename}\NormalTok{(}\AttributeTok{b\_19\_and\_under =}\NormalTok{ x19\_and\_under,}
+         \AttributeTok{b\_20\_24 =}\NormalTok{ x20\_24,}
+         \AttributeTok{b\_25\_29 =}\NormalTok{ x25\_29,}
+         \AttributeTok{b\_30\_34 =}\NormalTok{ x30\_34,}
+         \AttributeTok{b\_35\_39 =}\NormalTok{ x35\_39,}
+         \AttributeTok{b\_40\_44 =}\NormalTok{ x40\_44,}
+         \AttributeTok{b\_45\_and\_over =}\NormalTok{ x45\_and\_over,}
+         \AttributeTok{b\_total =}\NormalTok{ total\_births,}
+         \AttributeTok{income\_net\_before =}\NormalTok{ net\_before,}
+         \AttributeTok{income\_net\_after =}\NormalTok{ net\_after,}
+         \AttributeTok{income\_net\_house =}\NormalTok{ house\_price,}
+         \AttributeTok{h\_1bed =} \StringTok{\textasciigrave{}}\AttributeTok{1bed}\StringTok{\textasciigrave{}}\NormalTok{,}
+         \AttributeTok{h\_2bed =} \StringTok{\textasciigrave{}}\AttributeTok{2bed}\StringTok{\textasciigrave{}}\NormalTok{,}
+         \AttributeTok{h\_3bed =} \StringTok{\textasciigrave{}}\AttributeTok{3bed}\StringTok{\textasciigrave{}}\NormalTok{,}
+         \AttributeTok{h\_4bed =} \StringTok{\textasciigrave{}}\AttributeTok{4bed}\StringTok{\textasciigrave{}}\NormalTok{,}
+         \AttributeTok{h\_total\_above2 =}\NormalTok{ total\_above2, }
+         \AttributeTok{h\_total =}\NormalTok{ total,}
+         \AttributeTok{h\_pct\_above2 =}\NormalTok{ pct\_above2,}
+         \AttributeTok{h\_pct\_below2 =}\NormalTok{ pct\_below2}
+\NormalTok{  )}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{names}\NormalTok{(master\_df)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##  [1] "msoa_2021_code"     "msoa_2021_name"     "f_pop_19_and_under"
+##  [4] "f_pop_20_24"        "f_pop_25_29"        "f_pop_30_34"       
+##  [7] "f_pop_35_39"        "f_pop_40_44"        "f_pop_45_and_over" 
+## [10] "f_pop_total"        "b_19_and_under"     "b_20_24"           
+## [13] "b_25_29"            "b_30_34"            "b_35_39"           
+## [16] "b_40_44"            "b_45_and_over"      "b_total"           
+## [19] "income_net_before"  "income_net_after"   "income_net_house"  
+## [22] "h_1bed"             "h_2bed"             "h_3bed"            
+## [25] "h_4bed"             "h_total_above2"     "h_total"           
+## [28] "h_pct_above2"       "h_pct_below2"
+\end{verbatim}
+
+2.1 Create New Column for fertility
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Create a column that calculates the total number of fertility per 1000 women}
+\NormalTok{master\_df }\OtherTok{\textless{}{-}}\NormalTok{ master\_df }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{mutate}\NormalTok{(}\AttributeTok{fertility\_rate =}\NormalTok{ (b\_total }\SpecialCharTok{/}\NormalTok{ f\_pop\_total) }\SpecialCharTok{*} \DecValTok{1000}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+2.2 Reading SHP files
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{london }\OtherTok{\textless{}{-}} \FunctionTok{st\_read}\NormalTok{(here}\SpecialCharTok{::}\FunctionTok{here}\NormalTok{(}\StringTok{"shp"}\NormalTok{,}
+                            \StringTok{"gla"}\NormalTok{,}
+                            \StringTok{"gla"}\NormalTok{,}
+                            \StringTok{"London\_GLA\_Boundary.shp"}\NormalTok{))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Reading layer `London_GLA_Boundary' from data source 
+##   `C:\Users\emily\OneDrive\Desktop\CASA_MSc_Desktop\MSc_Term01\0007-QM\Finale Assesment\shp\gla\gla\London_GLA_Boundary.shp' 
+##   using driver `ESRI Shapefile'
+## Simple feature collection with 1 feature and 4 fields
+## Geometry type: POLYGON
+## Dimension:     XY
+## Bounding box:  xmin: 503568.2 ymin: 155850.8 xmax: 561957.5 ymax: 200933.9
+## Projected CRS: OSGB36 / British National Grid
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{borough }\OtherTok{\textless{}{-}} \FunctionTok{st\_read}\NormalTok{(here}\SpecialCharTok{::}\FunctionTok{here}\NormalTok{(}\StringTok{"shp"}\NormalTok{,}
+                            \StringTok{"statistical{-}gis{-}boundaries{-}london"}\NormalTok{,}
+                            \StringTok{"statistical{-}gis{-}boundaries{-}london"}\NormalTok{,}
+                            \StringTok{"ESRI"}\NormalTok{,}
+                            \StringTok{"London\_Borough\_Excluding\_MHW.shp"}\NormalTok{))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Reading layer `London_Borough_Excluding_MHW' from data source 
+##   `C:\Users\emily\OneDrive\Desktop\CASA_MSc_Desktop\MSc_Term01\0007-QM\Finale Assesment\shp\statistical-gis-boundaries-london\statistical-gis-boundaries-london\ESRI\London_Borough_Excluding_MHW.shp' 
+##   using driver `ESRI Shapefile'
+## Simple feature collection with 33 features and 7 fields
+## Geometry type: MULTIPOLYGON
+## Dimension:     XY
+## Bounding box:  xmin: 503568.2 ymin: 155850.8 xmax: 561957.5 ymax: 200933.9
+## Projected CRS: OSGB36 / British National Grid
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# vector of borough MSOA shapefile paths}
+\NormalTok{files }\OtherTok{\textless{}{-}} \FunctionTok{list.files}\NormalTok{(}
+  \StringTok{"shp/LB\_MSOA2021\_shp/msoa2021/"}\NormalTok{,}
+  \AttributeTok{pattern =} \StringTok{"}\SpecialCharTok{\textbackslash{}\textbackslash{}}\StringTok{.shp$"}\NormalTok{,}
+  \AttributeTok{full.names =} \ConstantTok{TRUE}
+\NormalTok{)}
+
+\CommentTok{\# read + combine}
+\NormalTok{msoa }\OtherTok{\textless{}{-}}\NormalTok{ files }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{lapply}\NormalTok{(st\_read, }\AttributeTok{quiet =} \ConstantTok{TRUE}\NormalTok{) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{bind\_rows}\NormalTok{() }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{clean\_names}\NormalTok{()}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Reorganize msoa file}
+\NormalTok{msoa\_clean }\OtherTok{\textless{}{-}}\NormalTok{ msoa }\SpecialCharTok{\%\textgreater{}\%} 
+  \FunctionTok{clean\_names}\NormalTok{() }\SpecialCharTok{\%\textgreater{}\%} 
+  \FunctionTok{select}\NormalTok{(msoa21cd, }
+\NormalTok{         lad22nm,}
+\NormalTok{         geometry)}
+\end{Highlighting}
+\end{Shaded}
+
+2.3 Trim master data frame to just London
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{master\_df\_london }\OtherTok{\textless{}{-}}\NormalTok{ master\_df }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{semi\_join}\NormalTok{(}
+\NormalTok{    msoa\_clean,}
+    \AttributeTok{by =} \FunctionTok{c}\NormalTok{(}\StringTok{"msoa\_2021\_code"} \OtherTok{=} \StringTok{"msoa21cd"}\NormalTok{)}
+\NormalTok{  ) }\SpecialCharTok{\%\textgreater{}\%} 
+  \FunctionTok{drop\_na}\NormalTok{()}
+\end{Highlighting}
+\end{Shaded}
+
+\textbf{Step Three: First Observations}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{library}\NormalTok{(psych)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Warning: package 'psych' was built under R version 4.5.2
+\end{verbatim}
+
+\begin{verbatim}
+## 
+## Attaching package: 'psych'
+\end{verbatim}
+
+\begin{verbatim}
+## The following objects are masked from 'package:spatstat.geom':
+## 
+##     reflect, rescale
+\end{verbatim}
+
+\begin{verbatim}
+## The following objects are masked from 'package:terra':
+## 
+##     describe, distance, rescale
+\end{verbatim}
+
+\begin{verbatim}
+## The following object is masked from 'package:raster':
+## 
+##     distance
+\end{verbatim}
+
+\begin{verbatim}
+## The following objects are masked from 'package:ggplot2':
+## 
+##     %+%, alpha
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{psych}\SpecialCharTok{::}\FunctionTok{describe}\NormalTok{(master\_df\_london }\SpecialCharTok{\%\textgreater{}\%} \FunctionTok{select}\NormalTok{(fertility\_rate, h\_pct\_below2, income\_net\_house))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##                  vars   n  mean    sd median trimmed   mad   min    max  range
+## fertility_rate      1 963 80.48 19.05  80.23   79.84 15.32 20.27 256.30 236.04
+## h_pct_below2        2 963  0.21  0.12   0.21    0.21  0.14  0.01   0.58   0.57
+## income_net_house    3 963  5.69  4.63   5.90    5.74  4.31 -9.43  24.76  34.20
+##                  skew kurtosis   se
+## fertility_rate   2.22    17.32 0.61
+## h_pct_below2     0.37    -0.56 0.00
+## income_net_house 0.02     0.54 0.15
+\end{verbatim}
+
+\textbf{Step Four: Transform master London into a simple feature object}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Create the spatial version of your master data}
+\NormalTok{master\_london\_sf }\OtherTok{\textless{}{-}}\NormalTok{ msoa\_clean }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{inner\_join}\NormalTok{(master\_df\_london, }\AttributeTok{by =} \FunctionTok{c}\NormalTok{(}\StringTok{"msoa21cd"} \OtherTok{=} \StringTok{"msoa\_2021\_code"}\NormalTok{)) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{st\_transform}\NormalTok{(}\DecValTok{27700}\NormalTok{) }\CommentTok{\# Re{-}confirming OSGB36 CRS}
+\end{Highlighting}
+\end{Shaded}
+
+Map: MSOA Fertility Above and Below London Avg.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{library}\NormalTok{(tmap)}
+
+\CommentTok{\# Calculate the mean to use as a midpoint}
+\NormalTok{mean\_fert }\OtherTok{\textless{}{-}} \FunctionTok{mean}\NormalTok{(master\_london\_sf}\SpecialCharTok{$}\NormalTok{fertility\_rate, }\AttributeTok{na.rm =} \ConstantTok{TRUE}\NormalTok{)}
+
+\FunctionTok{tm\_shape}\NormalTok{(master\_london\_sf) }\SpecialCharTok{+}
+  \FunctionTok{tm\_polygons}\NormalTok{(}\StringTok{"fertility\_rate"}\NormalTok{,}
+              \AttributeTok{palette =} \StringTok{"{-}RdBu"}\NormalTok{, }\CommentTok{\# Red{-}Blue diverging palette}
+              \AttributeTok{midpoint =}\NormalTok{ mean\_fert, }
+              \AttributeTok{style =} \StringTok{"pretty"}\NormalTok{,}
+              \AttributeTok{title =} \StringTok{"Fertility vs. London Avg"}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{tm\_layout}\NormalTok{(}\AttributeTok{main.title =} \StringTok{"MSOA Fertility: Above/Below London Average"}\NormalTok{,}
+            \AttributeTok{legend.outside =} \ConstantTok{TRUE}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## 
+\end{verbatim}
+
+\begin{verbatim}
+## -- tmap v3 code detected -------------------------------------------------------
+\end{verbatim}
+
+\begin{verbatim}
+## [v3->v4] `tm_polygons()`: instead of `style = "pretty"`, use fill.scale =
+## `tm_scale_intervals()`.
+## i Migrate the argument(s) 'style', 'midpoint', 'palette' (rename to 'values')
+##   to 'tm_scale_intervals(<HERE>)'
+## For small multiples, specify a 'tm_scale_' for each multiple, and put them in a
+## list: 'fill'.scale = list(<scale1>, <scale2>, ...)'
+## [v3->v4] `tm_polygons()`: migrate the argument(s) related to the legend of the
+## visual variable `fill` namely 'title' to 'fill.legend = tm_legend(<HERE>)'
+## [v3->v4] `tm_layout()`: use `tm_title()` instead of `tm_layout(main.title = )`
+## Multiple palettes called "rd_bu" found: "brewer.rd_bu", "matplotlib.rd_bu". The first one, "brewer.rd_bu", is returned.
+## 
+## [cols4all] color palettes: use palettes from the R package cols4all. Run
+## `cols4all::c4a_gui()` to explore them. The old palette name "-RdBu" is named
+## "rd_bu" (in long format "brewer.rd_bu")
+\end{verbatim}
+
+\pandocbounded{\includegraphics[keepaspectratio]{QM_Code_files/figure-latex/unnamed-chunk-15-1.pdf}}
+
+Graph: Histogram Fertility Before Log
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{library}\NormalTok{(ggplot2)}
+
+\FunctionTok{ggplot}\NormalTok{(master\_df\_london, }\FunctionTok{aes}\NormalTok{(}\AttributeTok{x =}\NormalTok{ fertility\_rate)) }\SpecialCharTok{+} 
+  \FunctionTok{geom\_histogram}\NormalTok{(}\FunctionTok{aes}\NormalTok{(}\AttributeTok{y =}\NormalTok{ ..density..), }
+                 \AttributeTok{bins =} \DecValTok{50}\NormalTok{, }
+                 \AttributeTok{fill =} \StringTok{"\#69b3a2"}\NormalTok{, }
+                 \AttributeTok{color =} \StringTok{"\#e9ecef"}\NormalTok{, }
+                 \AttributeTok{alpha =} \FloatTok{0.8}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{geom\_density}\NormalTok{(}\AttributeTok{color =} \StringTok{"\#ff5733"}\NormalTok{, }\AttributeTok{size =} \DecValTok{1}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{geom\_vline}\NormalTok{(}\FunctionTok{aes}\NormalTok{(}\AttributeTok{xintercept =} \FunctionTok{mean}\NormalTok{(fertility\_rate)), }
+             \AttributeTok{color =} \StringTok{"red"}\NormalTok{, }\AttributeTok{linetype =} \StringTok{"dashed"}\NormalTok{, }\AttributeTok{size =} \DecValTok{1}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{annotate}\NormalTok{(}\StringTok{"text"}\NormalTok{, }\AttributeTok{x =} \DecValTok{110}\NormalTok{, }\AttributeTok{y =} \FloatTok{0.02}\NormalTok{, }
+           \AttributeTok{label =} \FunctionTok{paste}\NormalTok{(}\StringTok{"Mean ="}\NormalTok{, }\FunctionTok{round}\NormalTok{(}\FunctionTok{mean}\NormalTok{(master\_df\_london}\SpecialCharTok{$}\NormalTok{fertility\_rate), }\DecValTok{2}\NormalTok{)), }
+           \AttributeTok{color =} \StringTok{"red"}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{labs}\NormalTok{(}\AttributeTok{title =} \StringTok{"Distribution of Fertility Rates across London MSOAs"}\NormalTok{,}
+       \AttributeTok{subtitle =} \StringTok{"Note the extreme positive skew and heavy right tail"}\NormalTok{,}
+       \AttributeTok{x =} \StringTok{"Births per 1k Women (Ages 15{-}55)"}\NormalTok{,}
+       \AttributeTok{y =} \StringTok{"Density"}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{theme\_minimal}\NormalTok{()}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Warning: Using `size` aesthetic for lines was deprecated in ggplot2 3.4.0.
+## i Please use `linewidth` instead.
+## This warning is displayed once every 8 hours.
+## Call `lifecycle::last_lifecycle_warnings()` to see where this warning was
+## generated.
+\end{verbatim}
+
+\begin{verbatim}
+## Warning: The dot-dot notation (`..density..`) was deprecated in ggplot2 3.4.0.
+## i Please use `after_stat(density)` instead.
+## This warning is displayed once every 8 hours.
+## Call `lifecycle::last_lifecycle_warnings()` to see where this warning was
+## generated.
+\end{verbatim}
+
+\pandocbounded{\includegraphics[keepaspectratio]{QM_Code_files/figure-latex/unnamed-chunk-16-1.pdf}}
+
+Scatter: Scatter Plot Before Log
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{library}\NormalTok{(ggplot2)}
+\FunctionTok{library}\NormalTok{(sf)}
+
+\CommentTok{\# Extract Easting (X) and Northing (Y) from your sf object}
+\NormalTok{master\_coords }\OtherTok{\textless{}{-}}\NormalTok{ master\_london\_sf }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{st\_centroid}\NormalTok{() }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{st\_coordinates}\NormalTok{() }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{as.data.frame}\NormalTok{()}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Warning: st_centroid assumes attributes are constant over geometries
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Combine back with your data}
+\NormalTok{master\_plot\_data }\OtherTok{\textless{}{-}} \FunctionTok{cbind}\NormalTok{(master\_london\_sf, master\_coords)}
+
+\FunctionTok{ggplot}\NormalTok{(master\_plot\_data, }\FunctionTok{aes}\NormalTok{(}\AttributeTok{x =}\NormalTok{ X, }\AttributeTok{y =}\NormalTok{ fertility\_rate)) }\SpecialCharTok{+}
+  \FunctionTok{geom\_point}\NormalTok{(}\FunctionTok{aes}\NormalTok{(}\AttributeTok{color =}\NormalTok{ lad22nm), }\AttributeTok{alpha =} \FloatTok{0.5}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{geom\_smooth}\NormalTok{(}\AttributeTok{method =} \StringTok{"loess"}\NormalTok{, }\AttributeTok{color =} \StringTok{"red"}\NormalTok{, }\AttributeTok{size =} \DecValTok{1}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{geom\_hline}\NormalTok{(}\AttributeTok{yintercept =} \FloatTok{80.48}\NormalTok{, }\AttributeTok{linetype =} \StringTok{"dashed"}\NormalTok{, }\AttributeTok{color =} \StringTok{"blue"}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{annotate}\NormalTok{(}\StringTok{"text"}\NormalTok{, }\AttributeTok{x =} \DecValTok{520000}\NormalTok{, }\AttributeTok{y =} \DecValTok{85}\NormalTok{, }\AttributeTok{label =} \StringTok{"London Mean (80.48)"}\NormalTok{, }\AttributeTok{color =} \StringTok{"blue"}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{theme\_minimal}\NormalTok{() }\SpecialCharTok{+}
+  \FunctionTok{theme}\NormalTok{(}\AttributeTok{legend.position =} \StringTok{"none"}\NormalTok{) }\SpecialCharTok{+} \CommentTok{\# Hidden for clarity}
+  \FunctionTok{labs}\NormalTok{(}\AttributeTok{title =} \StringTok{"Fertility Rate: West to East London"}\NormalTok{,}
+       \AttributeTok{subtitle =} \StringTok{"X{-}axis represents Easting (meters from origin)"}\NormalTok{,}
+       \AttributeTok{x =} \StringTok{"Easting (West \textless{}{-}{-}{-}\textgreater{} East)"}\NormalTok{,}
+       \AttributeTok{y =} \StringTok{"Births per 1k Women"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## `geom_smooth()` using formula = 'y ~ x'
+\end{verbatim}
+
+\pandocbounded{\includegraphics[keepaspectratio]{QM_Code_files/figure-latex/unnamed-chunk-17-1.pdf}}
+
+Top High Fertility
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Pulling the top 5 MSOAs to identify their Boroughs (LAD11NM)}
+
+\NormalTok{top\_outliers }\OtherTok{\textless{}{-}}\NormalTok{ master\_london\_sf }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{arrange}\NormalTok{(}\FunctionTok{desc}\NormalTok{(fertility\_rate)) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{head}\NormalTok{(}\DecValTok{5}\NormalTok{) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{select}\NormalTok{(msoa21cd,}
+\NormalTok{         lad22nm,}
+\NormalTok{         fertility\_rate)}
+
+\FunctionTok{print}\NormalTok{(top\_outliers)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Simple feature collection with 5 features and 3 fields
+## Geometry type: POLYGON
+## Dimension:     XY
+## Bounding box:  xmin: 532527.2 ymin: 186596.6 xmax: 534992 ymax: 189055.4
+## Projected CRS: OSGB36 / British National Grid
+##    msoa21cd  lad22nm fertility_rate                       geometry
+## 1 E02000345  Hackney       256.3044 POLYGON ((534501.3 188166.5...
+## 2 E02000348  Hackney       242.9427 POLYGON ((534225.8 187952, ...
+## 3 E02000347  Hackney       221.8693 POLYGON ((533314.2 188008.1...
+## 4 E02000425 Haringey       194.5749 POLYGON ((534284 188269, 53...
+## 5 E02006921  Hackney       189.2231 POLYGON ((534845.9 187532.4...
+\end{verbatim}
+
+Bad Map
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{library}\NormalTok{(ggspatial)}
+\FunctionTok{library}\NormalTok{(viridis)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Loading required package: viridisLite
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{ggplot}\NormalTok{(master\_london\_sf) }\SpecialCharTok{+}
+  \CommentTok{\# Adds the clean, static gray{-}scale basemap}
+  \FunctionTok{annotation\_map\_tile}\NormalTok{(}\AttributeTok{type =} \StringTok{"cartolight"}\NormalTok{, }\AttributeTok{zoom =} \DecValTok{11}\NormalTok{, }\AttributeTok{forcedownload =} \ConstantTok{TRUE}\NormalTok{) }\SpecialCharTok{+} 
+  \CommentTok{\# Colors the MSOAs by your skewed fertility rate}
+  \FunctionTok{geom\_sf}\NormalTok{(}\FunctionTok{aes}\NormalTok{(}\AttributeTok{fill =}\NormalTok{ fertility\_rate), }\AttributeTok{color =} \ConstantTok{NA}\NormalTok{, }\AttributeTok{alpha =} \FloatTok{0.8}\NormalTok{) }\SpecialCharTok{+}
+  \CommentTok{\# Uses the professional Magma palette you liked}
+  \FunctionTok{scale\_fill\_viridis\_c}\NormalTok{(}\AttributeTok{option =} \StringTok{"magma"}\NormalTok{, }\AttributeTok{name =} \StringTok{"Births per 1k"}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{theme\_minimal}\NormalTok{() }\SpecialCharTok{+}
+  \FunctionTok{labs}\NormalTok{(}\AttributeTok{title =} \StringTok{"The London Fertility Landscape"}\NormalTok{,}
+       \AttributeTok{subtitle =} \StringTok{"Spatial Variance across 963 MSOAs"}\NormalTok{,}
+       \AttributeTok{caption =} \StringTok{"Basemap: CartoDB Positron | Projected CRS: OSGB36"}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{theme}\NormalTok{(}\AttributeTok{legend.position =} \StringTok{"right"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Zoom: 11
+\end{verbatim}
+
+\begin{verbatim}
+## Fetching 35 missing tiles
+\end{verbatim}
+
+\begin{verbatim}
+##   |                                                                              |                                                                      |   0%  |                                                                              |==                                                                    |   3%  |                                                                              |====                                                                  |   6%  |                                                                              |======                                                                |   9%  |                                                                              |========                                                              |  11%  |                                                                              |==========                                                            |  14%  |                                                                              |============                                                          |  17%  |                                                                              |==============                                                        |  20%  |                                                                              |================                                                      |  23%  |                                                                              |==================                                                    |  26%  |                                                                              |====================                                                  |  29%  |                                                                              |======================                                                |  31%  |                                                                              |========================                                              |  34%  |                                                                              |==========================                                            |  37%  |                                                                              |============================                                          |  40%  |                                                                              |==============================                                        |  43%  |                                                                              |================================                                      |  46%  |                                                                              |==================================                                    |  49%  |                                                                              |====================================                                  |  51%  |                                                                              |======================================                                |  54%  |                                                                              |========================================                              |  57%  |                                                                              |==========================================                            |  60%  |                                                                              |============================================                          |  63%  |                                                                              |==============================================                        |  66%  |                                                                              |================================================                      |  69%  |                                                                              |==================================================                    |  71%  |                                                                              |====================================================                  |  74%  |                                                                              |======================================================                |  77%  |                                                                              |========================================================              |  80%  |                                                                              |==========================================================            |  83%  |                                                                              |============================================================          |  86%  |                                                                              |==============================================================        |  89%  |                                                                              |================================================================      |  91%  |                                                                              |==================================================================    |  94%  |                                                                              |====================================================================  |  97%  |                                                                              |======================================================================| 100%
+\end{verbatim}
+
+\begin{verbatim}
+## ...complete!
+\end{verbatim}
+
+\pandocbounded{\includegraphics[keepaspectratio]{QM_Code_files/figure-latex/unnamed-chunk-19-1.pdf}}
+
+\textbf{Step Five: Analysis and Logs} - Log Transformation to all three
+variables - Histograms of before and after - Notes: ``To address
+negative values in the housing cost estimate (min = -9.43) and allow for
+\(log_{10}\) transformation, a constant offset of +10 was applied to all
+observations in the income\_net\_house variable''.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Define a tiny epsilon to prevent math errors at exactly 0 or 1}
+\NormalTok{eps }\OtherTok{\textless{}{-}} \FloatTok{0.001}
+
+\NormalTok{master\_london\_sf }\OtherTok{\textless{}{-}}\NormalTok{ master\_london\_sf }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{mutate}\NormalTok{(}
+    \CommentTok{\# 1. Log for Fertility (standard for counts with outliers)}
+    \AttributeTok{log\_fertility =} \FunctionTok{log10}\NormalTok{(fertility\_rate),}
+    
+    \CommentTok{\# 2. Log + 10 for Housing Cost (standard for income{-}based data)}
+    \AttributeTok{log\_housing\_cost =} \FunctionTok{log10}\NormalTok{(income\_net\_house }\SpecialCharTok{+} \DecValTok{10}\NormalTok{),}
+    
+    \CommentTok{\# 3. Logit for Small Dwellings (Best for proportions/percentages)}
+    \AttributeTok{logit\_small\_dwellings =} \FunctionTok{log}\NormalTok{((h\_pct\_below2 }\SpecialCharTok{+}\NormalTok{ eps) }\SpecialCharTok{/}\NormalTok{ (}\DecValTok{1} \SpecialCharTok{{-}}\NormalTok{ h\_pct\_below2 }\SpecialCharTok{+}\NormalTok{ eps))}
+\NormalTok{  )}
+\end{Highlighting}
+\end{Shaded}
+
+Fertility rates were log₁₀-transformed to reduce right skew. Housing
+income was log-transformed after adding a constant to accommodate
+negative values. The proportion of small dwellings was logit-transformed
+to respect its bounded nature and improve distributional symmetry.
+
+Histogram Fertility\_rate + log\_fertility
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# 2. Generate the Before/After Histograms}
+\FunctionTok{library}\NormalTok{(patchwork)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Warning: package 'patchwork' was built under R version 4.5.2
+\end{verbatim}
+
+\begin{verbatim}
+## 
+## Attaching package: 'patchwork'
+\end{verbatim}
+
+\begin{verbatim}
+## The following object is masked from 'package:spatstat.geom':
+## 
+##     area
+\end{verbatim}
+
+\begin{verbatim}
+## The following object is masked from 'package:terra':
+## 
+##     area
+\end{verbatim}
+
+\begin{verbatim}
+## The following object is masked from 'package:raster':
+## 
+##     area
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{p1 }\OtherTok{\textless{}{-}} \FunctionTok{ggplot}\NormalTok{(master\_london\_sf, }\FunctionTok{aes}\NormalTok{(}\AttributeTok{x=}\NormalTok{fertility\_rate)) }\SpecialCharTok{+} \FunctionTok{geom\_histogram}\NormalTok{(}\AttributeTok{fill=}\StringTok{"lightsalmon"}\NormalTok{, }\AttributeTok{alpha=}\FloatTok{0.7}\NormalTok{) }\SpecialCharTok{+} \FunctionTok{labs}\NormalTok{(}\AttributeTok{title=}\StringTok{"Raw"}\NormalTok{)}
+\NormalTok{p2 }\OtherTok{\textless{}{-}} \FunctionTok{ggplot}\NormalTok{(master\_london\_sf, }\FunctionTok{aes}\NormalTok{(}\AttributeTok{x=}\NormalTok{log\_fertility)) }\SpecialCharTok{+} \FunctionTok{geom\_histogram}\NormalTok{(}\AttributeTok{fill=}\StringTok{"orangered"}\NormalTok{, }\AttributeTok{alpha=}\FloatTok{0.6}\NormalTok{) }\SpecialCharTok{+} \FunctionTok{labs}\NormalTok{(}\AttributeTok{title=}\StringTok{"Log{-}Transformed"}\NormalTok{)}
+\NormalTok{p1 }\SpecialCharTok{+}\NormalTok{ p2}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## `stat_bin()` using `bins = 30`. Pick better value `binwidth`.
+\end{verbatim}
+
+\begin{verbatim}
+## `stat_bin()` using `bins = 30`. Pick better value `binwidth`.
+\end{verbatim}
+
+\pandocbounded{\includegraphics[keepaspectratio]{QM_Code_files/figure-latex/unnamed-chunk-21-1.pdf}}
+Histogram income\_net\_house + log\_housing\_cost
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# 3. Generate the Before/After Histograms}
+\NormalTok{i1 }\OtherTok{\textless{}{-}} \FunctionTok{ggplot}\NormalTok{(master\_london\_sf, }\FunctionTok{aes}\NormalTok{(}\AttributeTok{x=}\NormalTok{income\_net\_house)) }\SpecialCharTok{+} \FunctionTok{geom\_histogram}\NormalTok{(}\AttributeTok{fill=}\StringTok{"lightpink"}\NormalTok{, }\AttributeTok{alpha=}\FloatTok{0.5}\NormalTok{) }\SpecialCharTok{+} \FunctionTok{labs}\NormalTok{(}\AttributeTok{title=}\StringTok{"Raw"}\NormalTok{)}
+\NormalTok{i2 }\OtherTok{\textless{}{-}} \FunctionTok{ggplot}\NormalTok{(master\_london\_sf, }\FunctionTok{aes}\NormalTok{(}\AttributeTok{x=}\NormalTok{log\_housing\_cost)) }\SpecialCharTok{+} \FunctionTok{geom\_histogram}\NormalTok{(}\AttributeTok{fill=}\StringTok{"maroon"}\NormalTok{, }\AttributeTok{alpha=}\FloatTok{0.5}\NormalTok{) }\SpecialCharTok{+} \FunctionTok{labs}\NormalTok{(}\AttributeTok{title=}\StringTok{"Log{-}Transformed"}\NormalTok{)}
+\NormalTok{i1 }\SpecialCharTok{+}\NormalTok{ i2}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## `stat_bin()` using `bins = 30`. Pick better value `binwidth`.
+## `stat_bin()` using `bins = 30`. Pick better value `binwidth`.
+\end{verbatim}
+
+\pandocbounded{\includegraphics[keepaspectratio]{QM_Code_files/figure-latex/unnamed-chunk-22-1.pdf}}
+Histogram h\_pct\_below2 + log\_small\_dwellings +
+logit\_small\_dwellings
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# 3. Generate the Before/After Histograms}
+\NormalTok{h1 }\OtherTok{\textless{}{-}} \FunctionTok{ggplot}\NormalTok{(master\_london\_sf, }\FunctionTok{aes}\NormalTok{(}\AttributeTok{x=}\NormalTok{h\_pct\_below2)) }\SpecialCharTok{+} \FunctionTok{geom\_histogram}\NormalTok{(}\AttributeTok{fill=}\StringTok{"lightblue"}\NormalTok{, }\AttributeTok{alpha=}\FloatTok{0.5}\NormalTok{) }\SpecialCharTok{+} \FunctionTok{labs}\NormalTok{(}\AttributeTok{title=}\StringTok{"Raw"}\NormalTok{)}
+\NormalTok{h2 }\OtherTok{\textless{}{-}} \FunctionTok{ggplot}\NormalTok{(master\_london\_sf, }\FunctionTok{aes}\NormalTok{(}\AttributeTok{x=}\NormalTok{logit\_small\_dwellings)) }\SpecialCharTok{+} \FunctionTok{geom\_histogram}\NormalTok{(}\AttributeTok{fill=}\StringTok{"darkslategray"}\NormalTok{, }\AttributeTok{alpha=}\FloatTok{0.5}\NormalTok{) }\SpecialCharTok{+} \FunctionTok{labs}\NormalTok{(}\AttributeTok{title=}\StringTok{"Logit{-}Transformed"}\NormalTok{)}
+\NormalTok{h1 }\SpecialCharTok{+}\NormalTok{ h2 }
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## `stat_bin()` using `bins = 30`. Pick better value `binwidth`.
+## `stat_bin()` using `bins = 30`. Pick better value `binwidth`.
+\end{verbatim}
+
+\pandocbounded{\includegraphics[keepaspectratio]{QM_Code_files/figure-latex/unnamed-chunk-23-1.pdf}}
+Pearson Correlation
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{library}\NormalTok{(ggcorrplot)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Warning: package 'ggcorrplot' was built under R version 4.5.2
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# This selects your three \textquotesingle{}perfected\textquotesingle{} variables}
+\NormalTok{final\_analysis\_vars }\OtherTok{\textless{}{-}}\NormalTok{ master\_london\_sf }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{st\_drop\_geometry}\NormalTok{() }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{select}\NormalTok{(log\_fertility, logit\_small\_dwellings, log\_housing\_cost)}
+
+\CommentTok{\# Calculate the correlations}
+\NormalTok{final\_matrix }\OtherTok{\textless{}{-}} \FunctionTok{cor}\NormalTok{(final\_analysis\_vars, }\AttributeTok{use =} \StringTok{"complete.obs"}\NormalTok{)}
+
+\CommentTok{\# Print the final visual}
+\FunctionTok{ggcorrplot}\NormalTok{(final\_matrix, }
+           \AttributeTok{type =} \StringTok{"lower"}\NormalTok{, }
+           \AttributeTok{lab =} \ConstantTok{TRUE}\NormalTok{, }
+           \AttributeTok{title =} \StringTok{"Correlation Matrix: Logit{-}Pct and Log{-}Fertility"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Warning: `aes_string()` was deprecated in ggplot2 3.0.0.
+## i Please use tidy evaluation idioms with `aes()`.
+## i See also `vignette("ggplot2-in-packages")` for more information.
+## i The deprecated feature was likely used in the ggcorrplot package.
+##   Please report the issue at <https://github.com/kassambara/ggcorrplot/issues>.
+## This warning is displayed once every 8 hours.
+## Call `lifecycle::last_lifecycle_warnings()` to see where this warning was
+## generated.
+\end{verbatim}
+
+\pandocbounded{\includegraphics[keepaspectratio]{QM_Code_files/figure-latex/unnamed-chunk-24-1.pdf}}
+Housing cost and the prevalence of small dwellings are strongly
+correlated, reflecting underlying spatial and market structures in
+London. Fertility shows only a weak negative association with dwelling
+size and virtually no direct association with housing cost, suggesting
+that housing form rather than price alone may play a more important role
+in shaping fertility pattern
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{lm}\NormalTok{(log\_fertility }\SpecialCharTok{\textasciitilde{}}\NormalTok{ logit\_small\_dwellings }\SpecialCharTok{+}\NormalTok{ log\_housing\_cost, }\AttributeTok{data =}\NormalTok{ master\_london\_sf)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## 
+## Call:
+## lm(formula = log_fertility ~ logit_small_dwellings + log_housing_cost, 
+##     data = master_london_sf)
+## 
+## Coefficients:
+##           (Intercept)  logit_small_dwellings       log_housing_cost  
+##               1.65253               -0.03638                0.16034
+\end{verbatim}
+
+A one-unit increase in the log-odds of small dwellings is associated
+with a \textasciitilde3.6\% decrease in fertility (on the log scale).
+Housing form (dwelling size mix) has a stronger and more consistent
+relationship with fertility than housing cost alone. Controlling for
+housing cost, a higher prevalence of small dwellings is associated with
+lower fertility. Housing cost itself shows a positive association once
+housing form is accounted for, suggesting that dwelling structure may
+play a more important role than price alone in shaping fertility
+patterns across London.
+
+Anova test
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# One{-}Way ANOVA: Does Fertility differ by Borough?}
+\CommentTok{\# Replace \textquotesingle{}borough\_name\textquotesingle{} with the actual column name in your data}
+\NormalTok{anova\_res }\OtherTok{\textless{}{-}} \FunctionTok{aov}\NormalTok{(log\_fertility }\SpecialCharTok{\textasciitilde{}}\NormalTok{ lad22nm, }\AttributeTok{data =}\NormalTok{ master\_london\_sf)}
+\FunctionTok{summary}\NormalTok{(anova\_res)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##              Df Sum Sq Mean Sq F value Pr(>F)    
+## lad22nm      32  3.484  0.1089   17.02 <2e-16 ***
+## Residuals   930  5.948  0.0064                   
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+\end{verbatim}
+
+The p-value (Pr(\textgreater F)): It is \textless{} 2e-16. This is
+statistically as small as it gets, meaning the probability that the
+differences between London boroughs are just ``random chance'' is
+effectively zero.
+
+The F-value: At 17.02, it shows that the variation in fertility between
+boroughs is much larger than the variation within each borough.
+Conclusion for your notes: You have proven that Borough matters. This
+justifies moving away from a simple linear regression (which treats all
+963 MSOAs as independent) to a Linear Mixed Effects (LME) model (which
+recognizes that MSOAs are nested within boroughs).
+
+A one-way ANOVA indicates significant differences in mean log-fertility
+across London boroughs (F = 17.02, p \textless{} 0.001), suggesting that
+fertility patterns are structured by borough-level context rather than
+being randomly distributed across space.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{library}\NormalTok{(ggplot2)}
+\FunctionTok{library}\NormalTok{(sf)}
+
+\CommentTok{\# 1. Coordinate Reset and Variable Setup}
+\NormalTok{master\_london\_sf }\OtherTok{\textless{}{-}} \FunctionTok{st\_transform}\NormalTok{(master\_london\_sf, }\AttributeTok{crs =} \DecValTok{27700}\NormalTok{)}
+\NormalTok{coords }\OtherTok{\textless{}{-}} \FunctionTok{st\_coordinates}\NormalTok{(}\FunctionTok{st\_centroid}\NormalTok{(master\_london\_sf))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Warning: st_centroid assumes attributes are constant over geometries
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{master\_london\_sf}\SpecialCharTok{$}\NormalTok{X }\OtherTok{\textless{}{-}}\NormalTok{ coords[, }\DecValTok{1}\NormalTok{]   }\CommentTok{\# \textless{}{-}{-} EASTING}
+\NormalTok{master\_london\_sf}\SpecialCharTok{$}\NormalTok{Y }\OtherTok{\textless{}{-}}\NormalTok{ coords[, }\DecValTok{2}\NormalTok{]   }\CommentTok{\# (still available if needed)}
+
+\NormalTok{log\_mean\_val }\OtherTok{\textless{}{-}} \FunctionTok{log10}\NormalTok{(}\FloatTok{80.48}\NormalTok{)}
+
+\CommentTok{\# 2. WEST–EAST Plot}
+\FunctionTok{ggplot}\NormalTok{(master\_london\_sf, }\FunctionTok{aes}\NormalTok{(}\AttributeTok{x =}\NormalTok{ X, }\AttributeTok{y =}\NormalTok{ log\_fertility)) }\SpecialCharTok{+}
+  \FunctionTok{geom\_point}\NormalTok{(}\FunctionTok{aes}\NormalTok{(}\AttributeTok{color =}\NormalTok{ lad22nm), }\AttributeTok{alpha =} \FloatTok{0.5}\NormalTok{, }\AttributeTok{size =} \FloatTok{0.9}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{geom\_smooth}\NormalTok{(}\AttributeTok{method =} \StringTok{"loess"}\NormalTok{, }\AttributeTok{color =} \StringTok{"red"}\NormalTok{, }\AttributeTok{linewidth =} \FloatTok{1.1}\NormalTok{, }\AttributeTok{se =} \ConstantTok{TRUE}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{geom\_hline}\NormalTok{(}\AttributeTok{yintercept =}\NormalTok{ log\_mean\_val, }\AttributeTok{linetype =} \StringTok{"dashed"}\NormalTok{, }\AttributeTok{color =} \StringTok{"blue"}\NormalTok{) }\SpecialCharTok{+}
+
+  \CommentTok{\# Example central easting line (adjust if needed)}
+  \FunctionTok{geom\_vline}\NormalTok{(}\AttributeTok{xintercept =} \DecValTok{530000}\NormalTok{, }\AttributeTok{linetype =} \StringTok{"dotted"}\NormalTok{, }\AttributeTok{color =} \StringTok{"grey40"}\NormalTok{) }\SpecialCharTok{+}
+
+  \CommentTok{\# WEST–EAST annotation (mirroring your style)}
+  \FunctionTok{annotate}\NormalTok{(}\StringTok{"text"}\NormalTok{, }\AttributeTok{x =} \DecValTok{530000} \SpecialCharTok{+} \DecValTok{800}\NormalTok{, }\AttributeTok{y =} \FloatTok{1.5}\NormalTok{, }\AttributeTok{label =} \StringTok{"CENTRAL LONDON"}\NormalTok{,}
+           \AttributeTok{angle =} \DecValTok{90}\NormalTok{, }\AttributeTok{size =} \FloatTok{2.4}\NormalTok{, }\AttributeTok{color =} \StringTok{"grey35"}\NormalTok{,}
+           \AttributeTok{fontface =} \StringTok{"bold"}\NormalTok{, }\AttributeTok{family =} \StringTok{"sans"}\NormalTok{) }\SpecialCharTok{+}
+
+  \FunctionTok{annotate}\NormalTok{(}\StringTok{"text"}\NormalTok{, }\AttributeTok{x =} \DecValTok{515000}\NormalTok{, }\AttributeTok{y =}\NormalTok{ log\_mean\_val }\SpecialCharTok{+} \FloatTok{0.03}\NormalTok{,}
+           \AttributeTok{label =} \StringTok{"CITY MEAN (1.91)"}\NormalTok{, }\AttributeTok{color =} \StringTok{"blue"}\NormalTok{,}
+           \AttributeTok{size =} \DecValTok{3}\NormalTok{, }\AttributeTok{fontface =} \StringTok{"bold"}\NormalTok{, }\AttributeTok{family =} \StringTok{"sans"}\NormalTok{) }\SpecialCharTok{+}
+
+  \FunctionTok{theme\_minimal}\NormalTok{(}\AttributeTok{base\_family =} \StringTok{"sans"}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{theme}\NormalTok{(}
+    \AttributeTok{plot.title =} \FunctionTok{element\_text}\NormalTok{(}\AttributeTok{face =} \StringTok{"bold"}\NormalTok{, }\AttributeTok{size =} \DecValTok{15}\NormalTok{, }\AttributeTok{color =} \StringTok{"\#222222"}\NormalTok{),}
+    \AttributeTok{plot.subtitle =} \FunctionTok{element\_text}\NormalTok{(}\AttributeTok{size =} \DecValTok{10}\NormalTok{, }\AttributeTok{color =} \StringTok{"\#555555"}\NormalTok{, }\AttributeTok{margin =} \FunctionTok{margin}\NormalTok{(}\AttributeTok{b =} \DecValTok{10}\NormalTok{)),}
+    \AttributeTok{axis.title =} \FunctionTok{element\_text}\NormalTok{(}\AttributeTok{face =} \StringTok{"bold"}\NormalTok{, }\AttributeTok{size =} \DecValTok{10}\NormalTok{),}
+    \AttributeTok{panel.grid.minor =} \FunctionTok{element\_blank}\NormalTok{(),}
+    \AttributeTok{legend.position =} \StringTok{"bottom"}\NormalTok{,}
+    \AttributeTok{legend.title =} \FunctionTok{element\_text}\NormalTok{(}\AttributeTok{size =} \FloatTok{7.5}\NormalTok{, }\AttributeTok{face =} \StringTok{"bold"}\NormalTok{),}
+    \AttributeTok{legend.text =} \FunctionTok{element\_text}\NormalTok{(}\AttributeTok{size =} \DecValTok{5}\NormalTok{),}
+    \AttributeTok{legend.key.height =} \FunctionTok{unit}\NormalTok{(}\FloatTok{0.04}\NormalTok{, }\StringTok{"cm"}\NormalTok{),}
+    \AttributeTok{legend.key.width =} \FunctionTok{unit}\NormalTok{(}\FloatTok{0.2}\NormalTok{, }\StringTok{"cm"}\NormalTok{),}
+    \AttributeTok{legend.spacing.x =} \FunctionTok{unit}\NormalTok{(}\FloatTok{0.08}\NormalTok{, }\StringTok{"cm"}\NormalTok{),}
+    \AttributeTok{legend.box.spacing =} \FunctionTok{unit}\NormalTok{(}\FloatTok{0.05}\NormalTok{, }\StringTok{"cm"}\NormalTok{),}
+    \AttributeTok{legend.margin =} \FunctionTok{margin}\NormalTok{(}\AttributeTok{t =} \SpecialCharTok{{-}}\DecValTok{5}\NormalTok{, }\AttributeTok{b =} \SpecialCharTok{{-}}\DecValTok{5}\NormalTok{)}
+\NormalTok{  ) }\SpecialCharTok{+}
+
+  \FunctionTok{guides}\NormalTok{(}\AttributeTok{color =} \FunctionTok{guide\_legend}\NormalTok{(}
+    \AttributeTok{ncol =} \DecValTok{8}\NormalTok{,}
+    \AttributeTok{title.position =} \StringTok{"top"}\NormalTok{,}
+    \AttributeTok{override.aes =} \FunctionTok{list}\NormalTok{(}\AttributeTok{alpha =} \DecValTok{1}\NormalTok{, }\AttributeTok{size =} \FloatTok{1.8}\NormalTok{)}
+\NormalTok{  )) }\SpecialCharTok{+}
+
+  \FunctionTok{labs}\NormalTok{(}
+    \AttributeTok{title =} \StringTok{"WEST–EAST FERTILITY GRADIENT"}\NormalTok{,}
+    \AttributeTok{subtitle =} \StringTok{"Spatial variation in fertility rates across 963 MSOAs"}\NormalTok{,}
+    \AttributeTok{x =} \StringTok{"EASTING (METERS)"}\NormalTok{,}
+    \AttributeTok{y =} \StringTok{"LOG10 FERTILITY RATE"}\NormalTok{,}
+    \AttributeTok{color =} \StringTok{"BOROUGH SECTOR"}
+\NormalTok{  )}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## `geom_smooth()` using formula = 'y ~ x'
+\end{verbatim}
+
+\pandocbounded{\includegraphics[keepaspectratio]{QM_Code_files/figure-latex/unnamed-chunk-27-1.pdf}}
+The plot reveals a clear east--west spatial gradient in fertility across
+London, with lower values concentrated in central--western MSOAs and
+higher values toward the east. The non-linear trend and borough-level
+clustering suggest that fertility patterns are spatially structured and
+reflect broader socio-spatial processes rather than random variation.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{library}\NormalTok{(ggplot2)}
+\FunctionTok{library}\NormalTok{(sf)}
+
+\CommentTok{\# 1. Coordinate Reset and Variable Setup}
+\NormalTok{master\_london\_sf }\OtherTok{\textless{}{-}} \FunctionTok{st\_transform}\NormalTok{(master\_london\_sf, }\AttributeTok{crs =} \DecValTok{27700}\NormalTok{)}
+\NormalTok{coords }\OtherTok{\textless{}{-}} \FunctionTok{st\_coordinates}\NormalTok{(}\FunctionTok{st\_centroid}\NormalTok{(master\_london\_sf))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Warning: st_centroid assumes attributes are constant over geometries
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{master\_london\_sf}\SpecialCharTok{$}\NormalTok{Y }\OtherTok{\textless{}{-}}\NormalTok{ coords[, }\DecValTok{2}\NormalTok{]}
+
+\NormalTok{log\_mean\_val }\OtherTok{\textless{}{-}} \FunctionTok{log10}\NormalTok{(}\FloatTok{80.48}\NormalTok{)}
+
+\CommentTok{\# 2. Refined Plotting Code}
+\FunctionTok{ggplot}\NormalTok{(master\_london\_sf, }\FunctionTok{aes}\NormalTok{(}\AttributeTok{x =}\NormalTok{ Y, }\AttributeTok{y =}\NormalTok{ log\_fertility)) }\SpecialCharTok{+}
+  \FunctionTok{geom\_point}\NormalTok{(}\FunctionTok{aes}\NormalTok{(}\AttributeTok{color =}\NormalTok{ lad22nm), }\AttributeTok{alpha =} \FloatTok{0.5}\NormalTok{, }\AttributeTok{size =} \FloatTok{0.9}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{geom\_smooth}\NormalTok{(}\AttributeTok{method =} \StringTok{"loess"}\NormalTok{, }\AttributeTok{color =} \StringTok{"red"}\NormalTok{, }\AttributeTok{linewidth =} \FloatTok{1.1}\NormalTok{, }\AttributeTok{se =} \ConstantTok{TRUE}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{geom\_hline}\NormalTok{(}\AttributeTok{yintercept =}\NormalTok{ log\_mean\_val, }\AttributeTok{linetype =} \StringTok{"dashed"}\NormalTok{, }\AttributeTok{color =} \StringTok{"blue"}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{geom\_vline}\NormalTok{(}\AttributeTok{xintercept =} \DecValTok{180000}\NormalTok{, }\AttributeTok{linetype =} \StringTok{"dotted"}\NormalTok{, }\AttributeTok{color =} \StringTok{"grey40"}\NormalTok{) }\SpecialCharTok{+}
+
+  \CommentTok{\# Improved annotation placement}
+  \FunctionTok{annotate}\NormalTok{(}\StringTok{"text"}\NormalTok{, }\AttributeTok{x =} \DecValTok{180000} \SpecialCharTok{+} \DecValTok{500}\NormalTok{, }\AttributeTok{y =} \FloatTok{1.5}\NormalTok{, }\AttributeTok{label =} \StringTok{"CENTRAL LONDON"}\NormalTok{,}
+         \AttributeTok{angle =} \DecValTok{90}\NormalTok{, }\AttributeTok{size =} \FloatTok{2.4}\NormalTok{, }\AttributeTok{color =} \StringTok{"grey35"}\NormalTok{, }\AttributeTok{fontface =} \StringTok{"bold"}\NormalTok{, }\AttributeTok{family =} \StringTok{"sans"}\NormalTok{)}\SpecialCharTok{+}
+  \FunctionTok{annotate}\NormalTok{(}\StringTok{"text"}\NormalTok{, }\AttributeTok{x =} \DecValTok{160000}\NormalTok{, }\AttributeTok{y =}\NormalTok{ log\_mean\_val }\SpecialCharTok{+} \FloatTok{0.03}\NormalTok{,}
+           \AttributeTok{label =} \StringTok{"CITY MEAN (1.91)"}\NormalTok{, }\AttributeTok{color =} \StringTok{"blue"}\NormalTok{, }\AttributeTok{size =} \DecValTok{3}\NormalTok{, }\AttributeTok{fontface =} \StringTok{"bold"}\NormalTok{, }\AttributeTok{family =} \StringTok{"sans"}\NormalTok{) }\SpecialCharTok{+}
+
+  \FunctionTok{theme\_minimal}\NormalTok{(}\AttributeTok{base\_family =} \StringTok{"sans"}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{theme}\NormalTok{(}
+    \AttributeTok{plot.title =} \FunctionTok{element\_text}\NormalTok{(}\AttributeTok{face =} \StringTok{"bold"}\NormalTok{, }\AttributeTok{size =} \DecValTok{15}\NormalTok{, }\AttributeTok{color =} \StringTok{"\#222222"}\NormalTok{),}
+    \AttributeTok{plot.subtitle =} \FunctionTok{element\_text}\NormalTok{(}\AttributeTok{size =} \DecValTok{10}\NormalTok{, }\AttributeTok{color =} \StringTok{"\#555555"}\NormalTok{, }\AttributeTok{margin =} \FunctionTok{margin}\NormalTok{(}\AttributeTok{b =} \DecValTok{10}\NormalTok{)),}
+    \AttributeTok{axis.title =} \FunctionTok{element\_text}\NormalTok{(}\AttributeTok{face =} \StringTok{"bold"}\NormalTok{, }\AttributeTok{size =} \DecValTok{10}\NormalTok{),}
+    \AttributeTok{panel.grid.minor =} \FunctionTok{element\_blank}\NormalTok{(),}
+    \AttributeTok{legend.position =} \StringTok{"bottom"}\NormalTok{,}
+    \AttributeTok{legend.title =} \FunctionTok{element\_text}\NormalTok{(}\AttributeTok{size =} \FloatTok{7.5}\NormalTok{, }\AttributeTok{face =} \StringTok{"bold"}\NormalTok{),}
+    \AttributeTok{legend.text =} \FunctionTok{element\_text}\NormalTok{(}\AttributeTok{size =} \DecValTok{5}\NormalTok{),}
+    \AttributeTok{legend.key.height =} \FunctionTok{unit}\NormalTok{(}\FloatTok{0.04}\NormalTok{, }\StringTok{"cm"}\NormalTok{),}
+    \AttributeTok{legend.key.width =} \FunctionTok{unit}\NormalTok{(}\FloatTok{0.2}\NormalTok{, }\StringTok{"cm"}\NormalTok{),}
+    \AttributeTok{legend.spacing.x =} \FunctionTok{unit}\NormalTok{(}\FloatTok{0.08}\NormalTok{, }\StringTok{"cm"}\NormalTok{),}
+    \AttributeTok{legend.box.spacing =} \FunctionTok{unit}\NormalTok{(}\FloatTok{0.05}\NormalTok{, }\StringTok{"cm"}\NormalTok{),}
+    \AttributeTok{legend.margin =} \FunctionTok{margin}\NormalTok{(}\AttributeTok{t =} \SpecialCharTok{{-}}\DecValTok{5}\NormalTok{, }\AttributeTok{b =} \SpecialCharTok{{-}}\DecValTok{5}\NormalTok{)}
+\NormalTok{  ) }\SpecialCharTok{+}
+
+  \FunctionTok{guides}\NormalTok{(}\AttributeTok{color =} \FunctionTok{guide\_legend}\NormalTok{(}\AttributeTok{ncol =} \DecValTok{8}\NormalTok{, }\AttributeTok{title.position =} \StringTok{"top"}\NormalTok{,}
+                              \AttributeTok{override.aes =} \FunctionTok{list}\NormalTok{(}\AttributeTok{alpha =} \DecValTok{1}\NormalTok{, }\AttributeTok{size =} \FloatTok{1.8}\NormalTok{))) }\SpecialCharTok{+}
+
+  \FunctionTok{labs}\NormalTok{(}
+    \AttributeTok{title =} \StringTok{"NORTH{-}SOUTH FERTILITY GRADIENT"}\NormalTok{,}
+    \AttributeTok{subtitle =} \StringTok{"Rising birth rates towards the Northern periphery across 963 MSOAs"}\NormalTok{,}
+    \AttributeTok{x =} \StringTok{"NORTHING (METERS)"}\NormalTok{,}
+    \AttributeTok{y =} \StringTok{"LOG10 FERTILITY RATE"}\NormalTok{,}
+    \AttributeTok{color =} \StringTok{"BOROUGH SECTOR"}
+\NormalTok{  )}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## `geom_smooth()` using formula = 'y ~ x'
+\end{verbatim}
+
+\pandocbounded{\includegraphics[keepaspectratio]{QM_Code_files/figure-latex/unnamed-chunk-28-1.pdf}}
+
+Linear regression
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{lm\_simple }\OtherTok{\textless{}{-}} \FunctionTok{lm}\NormalTok{(}
+\NormalTok{  log\_fertility }\SpecialCharTok{\textasciitilde{}}\NormalTok{ logit\_small\_dwellings }\SpecialCharTok{+}\NormalTok{ log\_housing\_cost,}
+  \AttributeTok{data =}\NormalTok{ master\_london\_sf}
+\NormalTok{)}
+
+\FunctionTok{summary}\NormalTok{(lm\_simple)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## 
+## Call:
+## lm(formula = log_fertility ~ logit_small_dwellings + log_housing_cost, 
+##     data = master_london_sf)
+## 
+## Residuals:
+##      Min       1Q   Median       3Q      Max 
+## -0.56327 -0.05507  0.00755  0.05785  0.51222 
+## 
+## Coefficients:
+##                        Estimate Std. Error t value Pr(>|t|)    
+## (Intercept)            1.652526   0.031919  51.772  < 2e-16 ***
+## logit_small_dwellings -0.036378   0.004247  -8.565  < 2e-16 ***
+## log_housing_cost       0.160339   0.023792   6.739 2.74e-11 ***
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+## 
+## Residual standard error: 0.09526 on 960 degrees of freedom
+## Multiple R-squared:  0.07646,    Adjusted R-squared:  0.07453 
+## F-statistic: 39.74 on 2 and 960 DF,  p-value: < 2.2e-16
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{lm\_std }\OtherTok{\textless{}{-}} \FunctionTok{lm}\NormalTok{(}
+\NormalTok{  log\_fertility }\SpecialCharTok{\textasciitilde{}} \FunctionTok{scale}\NormalTok{(logit\_small\_dwellings) }\SpecialCharTok{+} \FunctionTok{scale}\NormalTok{(log\_housing\_cost),}
+  \AttributeTok{data =}\NormalTok{ master\_london\_sf}
+\NormalTok{)}
+
+\FunctionTok{summary}\NormalTok{(lm\_std)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## 
+## Call:
+## lm(formula = log_fertility ~ scale(logit_small_dwellings) + scale(log_housing_cost), 
+##     data = master_london_sf)
+## 
+## Residuals:
+##      Min       1Q   Median       3Q      Max 
+## -0.56327 -0.05507  0.00755  0.05785  0.51222 
+## 
+## Coefficients:
+##                               Estimate Std. Error t value Pr(>|t|)    
+## (Intercept)                   1.894502   0.003070 617.152  < 2e-16 ***
+## scale(logit_small_dwellings) -0.031371   0.003663  -8.565  < 2e-16 ***
+## scale(log_housing_cost)       0.024683   0.003663   6.739 2.74e-11 ***
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+## 
+## Residual standard error: 0.09526 on 960 degrees of freedom
+## Multiple R-squared:  0.07646,    Adjusted R-squared:  0.07453 
+## F-statistic: 39.74 on 2 and 960 DF,  p-value: < 2.2e-16
+\end{verbatim}
+
+Print
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{library}\NormalTok{(broom)}
+\FunctionTok{library}\NormalTok{(dplyr)}
+\FunctionTok{library}\NormalTok{(ggplot2)}
+
+\NormalTok{m }\OtherTok{\textless{}{-}} \FunctionTok{lm}\NormalTok{(log\_fertility }\SpecialCharTok{\textasciitilde{}}\NormalTok{ logit\_small\_dwellings }\SpecialCharTok{+}\NormalTok{ log\_housing\_cost, }\AttributeTok{data =}\NormalTok{ master\_london\_sf)}
+
+\NormalTok{aug }\OtherTok{\textless{}{-}} \FunctionTok{augment}\NormalTok{(m)  }\CommentTok{\# adds .fitted, .resid, .std.resid, .hat, .cooksd}
+
+\CommentTok{\# 1) Residuals vs Fitted}
+\NormalTok{p1 }\OtherTok{\textless{}{-}} \FunctionTok{ggplot}\NormalTok{(aug, }\FunctionTok{aes}\NormalTok{(.fitted, .resid)) }\SpecialCharTok{+}
+  \FunctionTok{geom\_point}\NormalTok{(}\AttributeTok{alpha =} \FloatTok{0.35}\NormalTok{, }\AttributeTok{size =} \FloatTok{1.2}\NormalTok{, }\AttributeTok{color =} \StringTok{"grey30"}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{geom\_smooth}\NormalTok{(}\AttributeTok{method =} \StringTok{"loess"}\NormalTok{, }\AttributeTok{se =} \ConstantTok{FALSE}\NormalTok{, }\AttributeTok{linewidth =} \DecValTok{1}\NormalTok{, }\AttributeTok{color =} \StringTok{"red"}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{geom\_hline}\NormalTok{(}\AttributeTok{yintercept =} \DecValTok{0}\NormalTok{, }\AttributeTok{linetype =} \StringTok{"dashed"}\NormalTok{, }\AttributeTok{linewidth =} \FloatTok{0.6}\NormalTok{, }\AttributeTok{color =} \StringTok{"grey50"}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{labs}\NormalTok{(}\AttributeTok{title =} \StringTok{"Residuals vs Fitted"}\NormalTok{, }\AttributeTok{x =} \StringTok{"Fitted values"}\NormalTok{, }\AttributeTok{y =} \StringTok{"Residuals"}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{theme\_minimal}\NormalTok{(}\AttributeTok{base\_size =} \DecValTok{13}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{theme}\NormalTok{(}\AttributeTok{panel.grid.minor =} \FunctionTok{element\_blank}\NormalTok{())}
+
+\CommentTok{\# 2) Q{-}Q Plot of standardized residuals}
+\NormalTok{p2 }\OtherTok{\textless{}{-}} \FunctionTok{ggplot}\NormalTok{(aug, }\FunctionTok{aes}\NormalTok{(}\AttributeTok{sample =}\NormalTok{ .std.resid)) }\SpecialCharTok{+}
+  \FunctionTok{stat\_qq}\NormalTok{(}\AttributeTok{alpha =} \FloatTok{0.35}\NormalTok{, }\AttributeTok{size =} \FloatTok{1.2}\NormalTok{, }\AttributeTok{color =} \StringTok{"grey30"}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{stat\_qq\_line}\NormalTok{(}\AttributeTok{linewidth =} \DecValTok{1}\NormalTok{, }\AttributeTok{color =} \StringTok{"red"}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{labs}\NormalTok{(}\AttributeTok{title =} \StringTok{"Normal Q{-}Q"}\NormalTok{, }\AttributeTok{x =} \StringTok{"Theoretical quantiles"}\NormalTok{, }\AttributeTok{y =} \StringTok{"Standardized residuals"}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{theme\_minimal}\NormalTok{(}\AttributeTok{base\_size =} \DecValTok{13}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{theme}\NormalTok{(}\AttributeTok{panel.grid.minor =} \FunctionTok{element\_blank}\NormalTok{())}
+
+\CommentTok{\# 3) Scale{-}Location}
+\NormalTok{p3 }\OtherTok{\textless{}{-}} \FunctionTok{ggplot}\NormalTok{(aug, }\FunctionTok{aes}\NormalTok{(.fitted, }\FunctionTok{sqrt}\NormalTok{(}\FunctionTok{abs}\NormalTok{(.std.resid)))) }\SpecialCharTok{+}
+  \FunctionTok{geom\_point}\NormalTok{(}\AttributeTok{alpha =} \FloatTok{0.35}\NormalTok{, }\AttributeTok{size =} \FloatTok{1.2}\NormalTok{, }\AttributeTok{color =} \StringTok{"grey30"}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{geom\_smooth}\NormalTok{(}\AttributeTok{method =} \StringTok{"loess"}\NormalTok{, }\AttributeTok{se =} \ConstantTok{FALSE}\NormalTok{, }\AttributeTok{linewidth =} \DecValTok{1}\NormalTok{, }\AttributeTok{color =} \StringTok{"red"}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{labs}\NormalTok{(}\AttributeTok{title =} \StringTok{"Scale{-}Location"}\NormalTok{, }\AttributeTok{x =} \StringTok{"Fitted values"}\NormalTok{, }\AttributeTok{y =} \FunctionTok{expression}\NormalTok{(}\FunctionTok{sqrt}\NormalTok{(}\StringTok{"|Standardized residuals|"}\NormalTok{))) }\SpecialCharTok{+}
+  \FunctionTok{theme\_minimal}\NormalTok{(}\AttributeTok{base\_size =} \DecValTok{13}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{theme}\NormalTok{(}\AttributeTok{panel.grid.minor =} \FunctionTok{element\_blank}\NormalTok{())}
+
+\CommentTok{\# 4) Residuals vs Leverage (with Cook\textquotesingle{}s distance highlight)}
+\NormalTok{p4 }\OtherTok{\textless{}{-}} \FunctionTok{ggplot}\NormalTok{(aug, }\FunctionTok{aes}\NormalTok{(.hat, .std.resid)) }\SpecialCharTok{+}
+  \FunctionTok{geom\_point}\NormalTok{(}\FunctionTok{aes}\NormalTok{(}\AttributeTok{size =}\NormalTok{ .cooksd), }\AttributeTok{alpha =} \FloatTok{0.35}\NormalTok{, }\AttributeTok{color =} \StringTok{"grey30"}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{geom\_smooth}\NormalTok{(}\AttributeTok{method =} \StringTok{"loess"}\NormalTok{, }\AttributeTok{se =} \ConstantTok{FALSE}\NormalTok{, }\AttributeTok{linewidth =} \DecValTok{1}\NormalTok{, }\AttributeTok{color =} \StringTok{"red"}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{geom\_hline}\NormalTok{(}\AttributeTok{yintercept =} \DecValTok{0}\NormalTok{, }\AttributeTok{linetype =} \StringTok{"dashed"}\NormalTok{, }\AttributeTok{linewidth =} \FloatTok{0.6}\NormalTok{, }\AttributeTok{color =} \StringTok{"grey50"}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{scale\_size\_continuous}\NormalTok{(}\AttributeTok{range =} \FunctionTok{c}\NormalTok{(}\DecValTok{1}\NormalTok{, }\DecValTok{5}\NormalTok{), }\AttributeTok{guide =} \StringTok{"none"}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{labs}\NormalTok{(}\AttributeTok{title =} \StringTok{"Residuals vs Leverage"}\NormalTok{, }\AttributeTok{x =} \StringTok{"Leverage"}\NormalTok{, }\AttributeTok{y =} \StringTok{"Standardized residuals"}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{theme\_minimal}\NormalTok{(}\AttributeTok{base\_size =} \DecValTok{13}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{theme}\NormalTok{(}\AttributeTok{panel.grid.minor =} \FunctionTok{element\_blank}\NormalTok{())}
+
+\FunctionTok{library}\NormalTok{(patchwork)}
+\NormalTok{(p1 }\SpecialCharTok{|}\NormalTok{ p2) }\SpecialCharTok{/}\NormalTok{ (p3 }\SpecialCharTok{|}\NormalTok{ p4)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## `geom_smooth()` using formula = 'y ~ x'
+## `geom_smooth()` using formula = 'y ~ x'
+## `geom_smooth()` using formula = 'y ~ x'
+\end{verbatim}
+
+\pandocbounded{\includegraphics[keepaspectratio]{QM_Code_files/figure-latex/unnamed-chunk-31-1.pdf}}
+
+A multivariate linear regression indicates that neighbourhoods with a
+higher proportion of small dwellings exhibit significantly lower
+fertility rates, even after controlling for housing costs. In contrast,
+higher housing costs are positively associated with fertility,
+suggesting a compositional effect linked to affluence rather than
+affordability constraints.
+
+While housing affordability is often framed as a primary constraint on
+fertility, the results suggest that housing form---particularly the
+prevalence of small dwellings---plays a more decisive role. High-cost
+areas are not uniformly associated with lower fertility, indicating that
+affordability alone does not explain spatial variation in birth rates
+across London.
+
+PCA test
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# 1. Run PCA on the two \textquotesingle{}Squeeze\textquotesingle{} variables}
+\NormalTok{pca\_results }\OtherTok{\textless{}{-}} \FunctionTok{prcomp}\NormalTok{(master\_london\_sf }\SpecialCharTok{\%\textgreater{}\%} 
+                        \FunctionTok{st\_drop\_geometry}\NormalTok{() }\SpecialCharTok{\%\textgreater{}\%} 
+                        \FunctionTok{select}\NormalTok{(logit\_small\_dwellings, log\_housing\_cost), }
+                      \AttributeTok{scale. =} \ConstantTok{TRUE}\NormalTok{)}
+
+\CommentTok{\# 2. Add the first component (the Squeeze Index) to your main data}
+\CommentTok{\# We multiply by {-}1 if needed to ensure higher values = higher squeeze}
+\NormalTok{master\_london\_sf}\SpecialCharTok{$}\NormalTok{squeeze\_index }\OtherTok{\textless{}{-}}\NormalTok{ pca\_results}\SpecialCharTok{$}\NormalTok{x[,}\DecValTok{1}\NormalTok{]}
+
+\CommentTok{\# 3. Quick Validation: Correlation between Squeeze and Fertility}
+\FunctionTok{cor}\NormalTok{(master\_london\_sf}\SpecialCharTok{$}\NormalTok{log\_fertility, master\_london\_sf}\SpecialCharTok{$}\NormalTok{squeeze\_index)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] -0.05935864
+\end{verbatim}
+
+To summarize your PCA results: While Principal Component Analysis
+successfully merged ``Space'' and ``Price'' into a single Urban Squeeze
+Index, the resulting weak correlation of -0.059 with fertility suggests
+that these environmental pressures do not influence birth rates in a
+uniform, linear way across the entire city.
+
+A composite squeeze index shows only a weak overall association with
+fertility, suggesting that housing form and cost operate through
+distinct mechanisms.
+
+Clustering
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{set.seed}\NormalTok{(}\DecValTok{123}\NormalTok{) }\CommentTok{\# For consistent results}
+
+\CommentTok{\# Select variables for clustering}
+\NormalTok{cluster\_data }\OtherTok{\textless{}{-}}\NormalTok{ master\_london\_sf }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{st\_drop\_geometry}\NormalTok{() }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{select}\NormalTok{(log\_fertility, logit\_small\_dwellings, log\_housing\_cost) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{scale}\NormalTok{() }\CommentTok{\# Standardize so they have equal weight}
+
+\CommentTok{\# Run K{-}means (let\textquotesingle{}s start with 4 clusters: The 4 faces of London)}
+\NormalTok{clusters }\OtherTok{\textless{}{-}} \FunctionTok{kmeans}\NormalTok{(cluster\_data, }\AttributeTok{centers =} \DecValTok{4}\NormalTok{, }\AttributeTok{nstart =} \DecValTok{25}\NormalTok{)}
+
+\CommentTok{\# Add cluster labels back to your main data}
+\NormalTok{master\_london\_sf}\SpecialCharTok{$}\NormalTok{type\_cluster }\OtherTok{\textless{}{-}} \FunctionTok{as.factor}\NormalTok{(clusters}\SpecialCharTok{$}\NormalTok{cluster)}
+
+\CommentTok{\# Check the sizes of your new "neighborhood types"}
+\FunctionTok{table}\NormalTok{(master\_london\_sf}\SpecialCharTok{$}\NormalTok{type\_cluster)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## 
+##   1   2   3   4 
+## 271 103 248 341
+\end{verbatim}
+
+``London MSOAs can be grouped into a small number of distinct
+housing--fertility profiles.''
+
+LME
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{library}\NormalTok{(lme4)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Warning: package 'lme4' was built under R version 4.5.2
+\end{verbatim}
+
+\begin{verbatim}
+## Loading required package: Matrix
+\end{verbatim}
+
+\begin{verbatim}
+## 
+## Attaching package: 'Matrix'
+\end{verbatim}
+
+\begin{verbatim}
+## The following objects are masked from 'package:tidyr':
+## 
+##     expand, pack, unpack
+\end{verbatim}
+
+\begin{verbatim}
+## 
+## Attaching package: 'lme4'
+\end{verbatim}
+
+\begin{verbatim}
+## The following object is masked from 'package:nlme':
+## 
+##     lmList
+\end{verbatim}
+
+\begin{verbatim}
+## The following object is masked from 'package:raster':
+## 
+##     getData
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{library}\NormalTok{(lmerTest)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Warning: package 'lmerTest' was built under R version 4.5.2
+\end{verbatim}
+
+\begin{verbatim}
+## 
+## Attaching package: 'lmerTest'
+\end{verbatim}
+
+\begin{verbatim}
+## The following object is masked from 'package:lme4':
+## 
+##     lmer
+\end{verbatim}
+
+\begin{verbatim}
+## The following object is masked from 'package:stats':
+## 
+##     step
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Mixed Effects Model: Log{-}Fertility \textasciitilde{} Squeeze Index + (Random Effect for Borough)}
+\NormalTok{lme\_results }\OtherTok{\textless{}{-}} \FunctionTok{lmer}\NormalTok{(log\_fertility }\SpecialCharTok{\textasciitilde{}}\NormalTok{ squeeze\_index }\SpecialCharTok{+}\NormalTok{ (}\DecValTok{1} \SpecialCharTok{|}\NormalTok{ lad22nm), }
+                   \AttributeTok{data =}\NormalTok{ master\_london\_sf)}
+
+\FunctionTok{summary}\NormalTok{(lme\_results)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Linear mixed model fit by REML. t-tests use Satterthwaite's method [
+## lmerModLmerTest]
+## Formula: log_fertility ~ squeeze_index + (1 | lad22nm)
+##    Data: master_london_sf
+## 
+## REML criterion at convergence: -2009.4
+## 
+## Scaled residuals: 
+##     Min      1Q  Median      3Q     Max 
+## -4.6406 -0.5067  0.0548  0.5589  5.8867 
+## 
+## Random effects:
+##  Groups   Name        Variance Std.Dev.
+##  lad22nm  (Intercept) 0.007477 0.08647 
+##  Residual             0.006350 0.07969 
+## Number of obs: 963, groups:  lad22nm, 33
+## 
+## Fixed effects:
+##                Estimate Std. Error        df t value Pr(>|t|)    
+## (Intercept)   1.881e+00  1.538e-02 1.842e+01 122.335  < 2e-16 ***
+## squeeze_index 9.932e-03  2.575e-03 9.489e+02   3.858 0.000122 ***
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+## 
+## Correlation of Fixed Effects:
+##             (Intr)
+## squeeze_ndx -0.010
+\end{verbatim}
+
+Once borough-level context is accounted for, the squeeze index has a
+small but statistically significant association with fertility
+
+The ``Squeeze'' is Significant (\(p = 0.000122\)): Even though your
+city-wide correlation was nearly zero, the LME shows that the
+squeeze\_index is a highly significant predictor of fertility. This
+proves that once you account for borough-level differences, the combined
+pressure of space and price does drive the birth rate.The Random Effects
+(Variance = 0.007): The variance at the borough level (lad22nm) is
+slightly higher than the residual variance (0.006). This confirms your
+ANOVA finding: ``Where'' you are in London (Borough) is just as
+important as the physical ``Squeeze'' of your flat.The Positive Estimate
+(\(9.932e-03\)): Note that your estimate is positive. This means in this
+specific model iteration, higher index scores correlate with higher
+fertility. You should double-check the ``direction'' of your PCA
+rotation to see if ``higher index'' actually means ``less squeeze''.
+
+While a composite housing ``squeeze'' index combining dwelling size and
+housing cost shows little direct association with fertility at the
+city-wide level, mixed-effects modelling reveals a small but
+statistically significant relationship once borough-level context is
+accounted for. This suggests that housing pressures influence fertility
+in a spatially contingent manner, operating differently across local
+contexts rather than uniformly across London.
+
+LME finale
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{library}\NormalTok{(lme4)}
+\FunctionTok{library}\NormalTok{(lmerTest)}
+
+\CommentTok{\# The Big One: Predicting fertility using our PCA \textquotesingle{}Squeeze\textquotesingle{} Index}
+\CommentTok{\# We use Borough as a random effect to account for regional differences}
+\NormalTok{lme\_final }\OtherTok{\textless{}{-}} \FunctionTok{lmer}\NormalTok{(log\_fertility }\SpecialCharTok{\textasciitilde{}}\NormalTok{ squeeze\_index }\SpecialCharTok{+}\NormalTok{ (}\DecValTok{1} \SpecialCharTok{|}\NormalTok{ lad22nm), }
+                  \AttributeTok{data =}\NormalTok{ master\_london\_sf)}
+
+\CommentTok{\# Print results}
+\FunctionTok{summary}\NormalTok{(lme\_final)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Linear mixed model fit by REML. t-tests use Satterthwaite's method [
+## lmerModLmerTest]
+## Formula: log_fertility ~ squeeze_index + (1 | lad22nm)
+##    Data: master_london_sf
+## 
+## REML criterion at convergence: -2009.4
+## 
+## Scaled residuals: 
+##     Min      1Q  Median      3Q     Max 
+## -4.6406 -0.5067  0.0548  0.5589  5.8867 
+## 
+## Random effects:
+##  Groups   Name        Variance Std.Dev.
+##  lad22nm  (Intercept) 0.007477 0.08647 
+##  Residual             0.006350 0.07969 
+## Number of obs: 963, groups:  lad22nm, 33
+## 
+## Fixed effects:
+##                Estimate Std. Error        df t value Pr(>|t|)    
+## (Intercept)   1.881e+00  1.538e-02 1.842e+01 122.335  < 2e-16 ***
+## squeeze_index 9.932e-03  2.575e-03 9.489e+02   3.858 0.000122 ***
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+## 
+## Correlation of Fixed Effects:
+##             (Intr)
+## squeeze_ndx -0.010
+\end{verbatim}
+
+Residuals map draft
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{library}\NormalTok{(tmap)}
+
+\CommentTok{\# 1. Map the Cluster Typology}
+\FunctionTok{tm\_shape}\NormalTok{(master\_london\_sf) }\SpecialCharTok{+}
+  \FunctionTok{tm\_fill}\NormalTok{(}\StringTok{"type\_cluster"}\NormalTok{, }
+          \AttributeTok{palette =} \StringTok{"Set1"}\NormalTok{, }
+          \AttributeTok{title =} \StringTok{"Neighborhood Types"}\NormalTok{,}
+          \AttributeTok{labels =} \FunctionTok{c}\NormalTok{(}\StringTok{"Suburban"}\NormalTok{, }\StringTok{"Extreme/High{-}Birth"}\NormalTok{, }\StringTok{"Inner{-}Transition"}\NormalTok{, }\StringTok{"Middle London"}\NormalTok{)) }\SpecialCharTok{+}
+  \FunctionTok{tm\_borders}\NormalTok{(}\AttributeTok{alpha =} \FloatTok{0.2}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{tm\_layout}\NormalTok{(}\AttributeTok{title =} \StringTok{"London\textquotesingle{}s Fertility \& Squeeze Typology"}\NormalTok{, }\AttributeTok{frame =} \ConstantTok{FALSE}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## 
+\end{verbatim}
+
+\begin{verbatim}
+## -- tmap v3 code detected -------------------------------------------------------
+\end{verbatim}
+
+\begin{verbatim}
+## [v3->v4] `tm_tm_fill()`: migrate the argument(s) related to the scale of the
+## visual variable `fill` namely 'palette' (rename to 'values'), 'labels' to
+## fill.scale = tm_scale(<HERE>).
+## [v3->v4] `tm_fill()`: migrate the argument(s) related to the legend of the
+## visual variable `fill` namely 'title' to 'fill.legend = tm_legend(<HERE>)'
+## [v3->v4] `tm_borders()`: use 'fill' for the fill color of polygons/symbols
+## (instead of 'col'), and 'col' for the outlines (instead of 'border.col').
+## [v3->v4] `tm_borders()`: use `fill_alpha` instead of `alpha`.
+## [v3->v4] `tm_layout()`: use `tm_title()` instead of `tm_layout(title = )`
+## [cols4all] color palettes: use palettes from the R package cols4all. Run
+## `cols4all::c4a_gui()` to explore them. The old palette name "Set1" is named
+## "brewer.set1"
+\end{verbatim}
+
+\pandocbounded{\includegraphics[keepaspectratio]{QM_Code_files/figure-latex/unnamed-chunk-36-1.pdf}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# 2. Add LME Residuals to the data to see where the model \textquotesingle{}missed\textquotesingle{}}
+\NormalTok{master\_london\_sf}\SpecialCharTok{$}\NormalTok{residuals }\OtherTok{\textless{}{-}} \FunctionTok{residuals}\NormalTok{(lme\_final)}
+
+\CommentTok{\# 3. Map the Residuals (The Hackney Effect)}
+\FunctionTok{tm\_shape}\NormalTok{(master\_london\_sf) }\SpecialCharTok{+}
+  \FunctionTok{tm\_fill}\NormalTok{(}\StringTok{"residuals"}\NormalTok{, }
+          \AttributeTok{palette =} \StringTok{"{-}RdBu"}\NormalTok{, }
+          \AttributeTok{style =} \StringTok{"quantile"}\NormalTok{, }
+          \AttributeTok{title =} \StringTok{"Model Residuals"}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{tm\_layout}\NormalTok{(}\AttributeTok{title =} \StringTok{"Where the \textquotesingle{}Squeeze\textquotesingle{} doesn\textquotesingle{}t apply (Red = Higher than expected births)"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## 
+## -- tmap v3 code detected -------------------------------------------------------
+## [v3->v4] `tm_fill()`: instead of `style = "quantile"`, use fill.scale =
+## `tm_scale_intervals()`.
+## i Migrate the argument(s) 'style', 'palette' (rename to 'values') to
+##   'tm_scale_intervals(<HERE>)'[v3->v4] `tm_fill()`: migrate the argument(s) related to the legend of the
+## visual variable `fill` namely 'title' to 'fill.legend = tm_legend(<HERE>)'[v3->v4] `tm_layout()`: use `tm_title()` instead of `tm_layout(title = )`Multiple palettes called "rd_bu" found: "brewer.rd_bu", "matplotlib.rd_bu". The first one, "brewer.rd_bu", is returned.
+## [scale] tm_fill:() the data variable assigned to 'fill' contains positive and negative values, so midpoint is set to 0. Set 'midpoint = NA' in 'fill.scale = tm_scale_intervals(<HERE>)' to use all visual values (e.g. colors)
+## [cols4all] color palettes: use palettes from the R package cols4all. Run
+## `cols4all::c4a_gui()` to explore them. The old palette name "-RdBu" is named
+## "rd_bu" (in long format "brewer.rd_bu")[plot mode] fit legend/component: Some legend items or map compoments do not
+## fit well, and are therefore rescaled.
+## i Set the tmap option `component.autoscale = FALSE` to disable rescaling.
+\end{verbatim}
+
+\pandocbounded{\includegraphics[keepaspectratio]{QM_Code_files/figure-latex/unnamed-chunk-36-2.pdf}}
+
+LME Preformance check + save
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{library}\NormalTok{(performance)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Warning: package 'performance' was built under R version 4.5.2
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{library}\NormalTok{(see)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Warning: package 'see' was built under R version 4.5.2
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{library}\NormalTok{(ggplot2)}
+
+\CommentTok{\# 1. Generate the check with specific theme adjustments for clarity}
+\NormalTok{diag\_plots }\OtherTok{\textless{}{-}} \FunctionTok{check\_model}\NormalTok{(lme\_final, }\AttributeTok{title =} \StringTok{"LME Model Diagnostic Panel"}\NormalTok{)}
+
+\CommentTok{\# 2. Plot with adjusted text size and layout}
+\FunctionTok{plot}\NormalTok{(diag\_plots) }\SpecialCharTok{+}
+  \FunctionTok{theme\_minimal}\NormalTok{(}\AttributeTok{base\_size =} \DecValTok{10}\NormalTok{) }\SpecialCharTok{+} \CommentTok{\# Scales up all text}
+  \FunctionTok{theme}\NormalTok{(}
+    \AttributeTok{plot.title =} \FunctionTok{element\_text}\NormalTok{(}\AttributeTok{face =} \StringTok{"bold"}\NormalTok{, }\AttributeTok{size =} \DecValTok{14}\NormalTok{),}
+    \AttributeTok{strip.text =} \FunctionTok{element\_text}\NormalTok{(}\AttributeTok{face =} \StringTok{"bold"}\NormalTok{) }\CommentTok{\# Makes subplot headers bold}
+\NormalTok{  )}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## For confidence bands, please install `qqplotr`.
+\end{verbatim}
+
+\begin{verbatim}
+## Ignoring unknown labels:
+## * size : ""
+\end{verbatim}
+
+\pandocbounded{\includegraphics[keepaspectratio]{QM_Code_files/figure-latex/unnamed-chunk-37-1.pdf}}
+
+\begin{verbatim}
+## Ignoring unknown labels:
+## * size : ""
+\end{verbatim}
+
+\pandocbounded{\includegraphics[keepaspectratio]{QM_Code_files/figure-latex/unnamed-chunk-37-2.pdf}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# 3. PRO TIP: Export as a large high{-}res image to stop text overlapping}
+\CommentTok{\# This is the secret to making \textquotesingle{}check\_model\textquotesingle{} look professional!}
+\FunctionTok{ggsave}\NormalTok{(}\StringTok{"LME\_Health\_Check.png"}\NormalTok{, }\AttributeTok{width =} \DecValTok{12}\NormalTok{, }\AttributeTok{height =} \DecValTok{10}\NormalTok{, }\AttributeTok{dpi =} \DecValTok{300}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Ignoring unknown labels:
+## * size : ""
+\end{verbatim}
+
+Map Risiduals Draft
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{library}\NormalTok{(tmap)}
+\FunctionTok{library}\NormalTok{(sf)}
+
+\FunctionTok{tmap\_mode}\NormalTok{(}\StringTok{"plot"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## i tmap modes "plot" - "view"
+## i toggle with `tmap::ttm()`
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# {-}{-}{-}{-}{-}{-}{-}{-}{-}{-} RESIDUALS MAP WITH OSM BACKGROUND {-}{-}{-}{-}{-}{-}{-}{-}{-}{-}}
+
+\CommentTok{\# Ensure CRS is Web Mercator for OSM}
+\NormalTok{master\_london\_sf }\OtherTok{\textless{}{-}} \FunctionTok{st\_transform}\NormalTok{(master\_london\_sf, }\DecValTok{3857}\NormalTok{)}
+
+\CommentTok{\# Add residuals (if not already added)}
+\NormalTok{master\_london\_sf}\SpecialCharTok{$}\NormalTok{residuals }\OtherTok{\textless{}{-}} \FunctionTok{residuals}\NormalTok{(lme\_final)}
+
+\CommentTok{\# Symmetric breaks around zero}
+\NormalTok{rmax }\OtherTok{\textless{}{-}} \FunctionTok{max}\NormalTok{(}\FunctionTok{abs}\NormalTok{(master\_london\_sf}\SpecialCharTok{$}\NormalTok{residuals), }\AttributeTok{na.rm =} \ConstantTok{TRUE}\NormalTok{)}
+\NormalTok{breaks }\OtherTok{\textless{}{-}} \FunctionTok{c}\NormalTok{(}\SpecialCharTok{{-}}\NormalTok{rmax, }\SpecialCharTok{{-}}\FloatTok{0.10}\NormalTok{, }\SpecialCharTok{{-}}\FloatTok{0.05}\NormalTok{, }\SpecialCharTok{{-}}\FloatTok{0.01}\NormalTok{, }\FloatTok{0.01}\NormalTok{, }\FloatTok{0.05}\NormalTok{, }\FloatTok{0.10}\NormalTok{, rmax)}
+
+\FunctionTok{tm\_basemap}\NormalTok{(}\StringTok{"OpenStreetMap"}\NormalTok{) }\SpecialCharTok{+}
+
+\FunctionTok{tm\_shape}\NormalTok{(master\_london\_sf) }\SpecialCharTok{+}
+  \FunctionTok{tm\_fill}\NormalTok{(}
+    \StringTok{"residuals"}\NormalTok{,}
+    \AttributeTok{palette =} \StringTok{"{-}RdBu"}\NormalTok{,}
+    \AttributeTok{style =} \StringTok{"fixed"}\NormalTok{,}
+    \AttributeTok{breaks =}\NormalTok{ breaks,}
+    \AttributeTok{midpoint =} \DecValTok{0}\NormalTok{,}
+    \AttributeTok{title =} \StringTok{"Model residuals"}\NormalTok{,}
+    \AttributeTok{colorNA =} \StringTok{"grey85"}\NormalTok{,}
+    \AttributeTok{textNA =} \StringTok{"Missing"}\NormalTok{,}
+    \AttributeTok{alpha =} \FloatTok{0.75}
+\NormalTok{  ) }\SpecialCharTok{+}
+  \FunctionTok{tm\_borders}\NormalTok{(}\AttributeTok{col =} \StringTok{"black"}\NormalTok{, }\AttributeTok{lwd =} \FloatTok{0.3}\NormalTok{, }\AttributeTok{alpha =} \FloatTok{0.4}\NormalTok{) }\SpecialCharTok{+}
+  
+  \FunctionTok{tm\_layout}\NormalTok{(}
+    \AttributeTok{title =} \StringTok{"Where the model misses"}\NormalTok{,}
+    \AttributeTok{title.size =} \FloatTok{1.2}\NormalTok{,}
+    \AttributeTok{legend.outside =} \ConstantTok{TRUE}\NormalTok{,}
+    \AttributeTok{legend.outside.position =} \StringTok{"right"}\NormalTok{,}
+    \AttributeTok{legend.title.size =} \DecValTok{1}\NormalTok{,}
+    \AttributeTok{legend.text.size =} \FloatTok{0.9}\NormalTok{,}
+    \AttributeTok{frame =} \ConstantTok{FALSE}\NormalTok{,}
+    \AttributeTok{inner.margins =} \FunctionTok{c}\NormalTok{(}\FloatTok{0.03}\NormalTok{, }\FloatTok{0.12}\NormalTok{, }\FloatTok{0.06}\NormalTok{, }\FloatTok{0.03}\NormalTok{)}
+\NormalTok{  ) }\SpecialCharTok{+}
+  
+  \FunctionTok{tm\_credits}\NormalTok{(}
+    \StringTok{"Red = higher fertility than expected · Blue = lower than expected"}\NormalTok{,}
+    \AttributeTok{position =} \FunctionTok{c}\NormalTok{(}\StringTok{"LEFT"}\NormalTok{, }\StringTok{"BOTTOM"}\NormalTok{),}
+    \AttributeTok{size =} \FloatTok{0.8}
+\NormalTok{  )}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## 
+## -- tmap v3 code detected -------------------------------------------------------
+## [v3->v4] `tm_fill()`: instead of `style = "fixed"`, use fill.scale =
+## `tm_scale_intervals()`.
+## i Migrate the argument(s) 'style', 'breaks', 'midpoint', 'palette' (rename to
+##   'values'), 'colorNA' (rename to 'value.na'), 'textNA' (rename to 'label.na')
+##   to 'tm_scale_intervals(<HERE>)'
+## For small multiples, specify a 'tm_scale_' for each multiple, and put them in a
+## list: 'fill'.scale = list(<scale1>, <scale2>, ...)'[v3->v4] `tm_fill()`: use `fill_alpha` instead of `alpha`.[v3->v4] `tm_fill()`: migrate the argument(s) related to the legend of the
+## visual variable `fill` namely 'title' to 'fill.legend = tm_legend(<HERE>)'[v3->v4] `tm_borders()`: use `fill_alpha` instead of `alpha`.[v3->v4] `tm_layout()`: use `tm_title()` instead of `tm_layout(title = )`[cols4all] color palettes: use palettes from the R package cols4all. Run
+## `cols4all::c4a_gui()` to explore them. The old palette name "-RdBu" is named
+## "rd_bu" (in long format "brewer.rd_bu")
+\end{verbatim}
+
+\pandocbounded{\includegraphics[keepaspectratio]{QM_Code_files/figure-latex/unnamed-chunk-38-1.pdf}}
+
+Dunno
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{library}\NormalTok{(tmap)}
+\FunctionTok{library}\NormalTok{(sf)}
+
+\FunctionTok{tmap\_mode}\NormalTok{(}\StringTok{"plot"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## i tmap modes "plot" - "view"
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Ensure CRS is correct for the background}
+\NormalTok{master\_london\_sf }\OtherTok{\textless{}{-}} \FunctionTok{st\_transform}\NormalTok{(master\_london\_sf, }\DecValTok{3857}\NormalTok{)}
+
+\CommentTok{\# Update palette to match the Binary \textquotesingle{}High vs Low\textquotesingle{} style}
+\CommentTok{\# We highlight \textquotesingle{}Extreme/High{-}Birth\textquotesingle{} (Cluster 2) in the darker tone}
+\NormalTok{cluster\_pal\_binary }\OtherTok{\textless{}{-}} \FunctionTok{c}\NormalTok{(}
+  \StringTok{"Suburban"}           \OtherTok{=} \StringTok{"lightcyan"}\NormalTok{,}
+  \StringTok{"Extreme/High{-}Birth"} \OtherTok{=} \StringTok{"maroon"}\NormalTok{,   }\CommentTok{\# The \textquotesingle{}High\textquotesingle{} outlier}
+  \StringTok{"Inner{-}Transition"}   \OtherTok{=} \StringTok{"plum"}\NormalTok{,}
+  \StringTok{"Middle London"}      \OtherTok{=} \StringTok{"lightsteelblue"}
+\NormalTok{)}
+
+\NormalTok{master\_london\_sf}\SpecialCharTok{$}\NormalTok{type\_cluster\_lbl }\OtherTok{\textless{}{-}} \FunctionTok{factor}\NormalTok{(}
+\NormalTok{  master\_london\_sf}\SpecialCharTok{$}\NormalTok{type\_cluster,}
+  \AttributeTok{levels =} \FunctionTok{c}\NormalTok{(}\StringTok{"1"}\NormalTok{,}\StringTok{"2"}\NormalTok{,}\StringTok{"3"}\NormalTok{,}\StringTok{"4"}\NormalTok{),}
+  \AttributeTok{labels =} \FunctionTok{names}\NormalTok{(cluster\_pal\_binary)}
+\NormalTok{)}
+
+\FunctionTok{tm\_basemap}\NormalTok{(}\StringTok{"CartoDB.Positron"}\NormalTok{) }\SpecialCharTok{+}
+\FunctionTok{tm\_shape}\NormalTok{(master\_london\_sf) }\SpecialCharTok{+}
+  \FunctionTok{tm\_fill}\NormalTok{(}
+    \StringTok{"type\_cluster\_lbl"}\NormalTok{,}
+    \AttributeTok{palette =}\NormalTok{ cluster\_pal\_binary,}
+    \AttributeTok{title =} \StringTok{"Fertility Type"}\NormalTok{,}
+    \AttributeTok{colorNA =} \StringTok{"grey90"}\NormalTok{,}
+    \AttributeTok{textNA =} \StringTok{"Missing"}\NormalTok{,}
+    \AttributeTok{alpha =} \FloatTok{0.65} \CommentTok{\# Transparency to let the OSM labels peek through}
+\NormalTok{  ) }\SpecialCharTok{+}
+  \FunctionTok{tm\_borders}\NormalTok{(}\AttributeTok{col =} \StringTok{"white"}\NormalTok{, }\AttributeTok{lwd =} \FloatTok{0.1}\NormalTok{) }\SpecialCharTok{+} \CommentTok{\# Clean white borders like your binary maps}
+  \FunctionTok{tm\_layout}\NormalTok{(}
+    \AttributeTok{title =} \StringTok{"London\textquotesingle{}s Fertility Typology"}\NormalTok{,}
+    \AttributeTok{title.position =} \FunctionTok{c}\NormalTok{(}\StringTok{"LEFT"}\NormalTok{, }\StringTok{"TOP"}\NormalTok{),}
+    \AttributeTok{title.size =} \FloatTok{1.6}\NormalTok{,}
+    \AttributeTok{title.fontface =} \StringTok{"bold"}\NormalTok{,}
+    \AttributeTok{title.bg.color =} \StringTok{"white"}\NormalTok{,}
+    \AttributeTok{title.bg.alpha =} \FloatTok{0.9}\NormalTok{,}
+    
+    \AttributeTok{legend.outside =} \ConstantTok{TRUE}\NormalTok{,}
+    \AttributeTok{legend.outside.position =} \StringTok{"right"}\NormalTok{,}
+    \AttributeTok{legend.title.size =} \FloatTok{1.1}\NormalTok{,}
+    \AttributeTok{legend.title.fontface =} \StringTok{"bold"}\NormalTok{,}
+    \AttributeTok{legend.text.size =} \FloatTok{0.9}\NormalTok{,}
+
+    \AttributeTok{frame =} \ConstantTok{FALSE}\NormalTok{,}
+    \AttributeTok{inner.margins =} \FunctionTok{c}\NormalTok{(}\FloatTok{0.08}\NormalTok{, }\FloatTok{0.12}\NormalTok{, }\FloatTok{0.06}\NormalTok{, }\FloatTok{0.03}\NormalTok{), }\CommentTok{\# Breathing room for the title}
+    \AttributeTok{bg.color =} \StringTok{"white"}
+\NormalTok{  ) }\SpecialCharTok{+}
+  \FunctionTok{tm\_credits}\NormalTok{(}
+    \StringTok{"Highlighted: High{-}birth clusters identified via K{-}means analysis"}\NormalTok{,}
+    \AttributeTok{position =} \FunctionTok{c}\NormalTok{(}\StringTok{"LEFT"}\NormalTok{, }\StringTok{"BOTTOM"}\NormalTok{),}
+    \AttributeTok{size =} \FloatTok{0.7}\NormalTok{,}
+    \AttributeTok{color =} \StringTok{"grey40"}
+\NormalTok{  )}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## 
+## -- tmap v3 code detected -------------------------------------------------------
+## [v3->v4] `tm_tm_fill()`: migrate the argument(s) related to the scale of the
+## visual variable `fill` namely 'palette' (rename to 'values'), 'colorNA' (rename
+## to 'value.na'), 'textNA' (rename to 'label.na') to fill.scale =
+## tm_scale(<HERE>).
+## i For small multiples, specify a 'tm_scale_' for each multiple, and put them in
+##   a list: 'fill.scale = list(<scale1>, <scale2>, ...)'[v3->v4] `tm_fill()`: use `fill_alpha` instead of `alpha`.[v3->v4] `tm_fill()`: migrate the argument(s) related to the legend of the
+## visual variable `fill` namely 'title' to 'fill.legend = tm_legend(<HERE>)'[v3->v4] `tm_layout()`: use `tm_title()` instead of `tm_layout(title = )`
+\end{verbatim}
+
+\pandocbounded{\includegraphics[keepaspectratio]{QM_Code_files/figure-latex/unnamed-chunk-39-1.pdf}}
+
+Residuals map
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{library}\NormalTok{(tmap)}
+\FunctionTok{library}\NormalTok{(sf)}
+
+\FunctionTok{tmap\_mode}\NormalTok{(}\StringTok{"plot"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## i tmap modes "plot" - "view"
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Ensure CRS is Web Mercator for tiles}
+\NormalTok{master\_london\_sf }\OtherTok{\textless{}{-}} \FunctionTok{st\_transform}\NormalTok{(master\_london\_sf, }\DecValTok{3857}\NormalTok{)}
+
+\CommentTok{\# Add residuals}
+\NormalTok{master\_london\_sf}\SpecialCharTok{$}\NormalTok{residuals }\OtherTok{\textless{}{-}} \FunctionTok{residuals}\NormalTok{(lme\_final)}
+
+\CommentTok{\# Symmetric breaks around zero (Strictly Preserved)}
+\NormalTok{rmax }\OtherTok{\textless{}{-}} \FunctionTok{max}\NormalTok{(}\FunctionTok{abs}\NormalTok{(master\_london\_sf}\SpecialCharTok{$}\NormalTok{residuals), }\AttributeTok{na.rm =} \ConstantTok{TRUE}\NormalTok{)}
+\NormalTok{breaks }\OtherTok{\textless{}{-}} \FunctionTok{c}\NormalTok{(}\SpecialCharTok{{-}}\NormalTok{rmax, }\SpecialCharTok{{-}}\FloatTok{0.10}\NormalTok{, }\SpecialCharTok{{-}}\FloatTok{0.05}\NormalTok{, }\SpecialCharTok{{-}}\FloatTok{0.01}\NormalTok{, }\FloatTok{0.01}\NormalTok{, }\FloatTok{0.05}\NormalTok{, }\FloatTok{0.10}\NormalTok{, rmax)}
+
+\CommentTok{\# {-}{-}{-}{-}{-} FINAL PROFESSIONAL LAYOUT {-}{-}{-}{-}{-}}
+
+\FunctionTok{tm\_basemap}\NormalTok{(}\StringTok{"CartoDB.Positron"}\NormalTok{) }\SpecialCharTok{+} 
+
+\FunctionTok{tm\_shape}\NormalTok{(master\_london\_sf) }\SpecialCharTok{+}
+  \FunctionTok{tm\_fill}\NormalTok{(}
+    \StringTok{"residuals"}\NormalTok{,}
+    \AttributeTok{palette =} \StringTok{"{-}RdBu"}\NormalTok{,  }\CommentTok{\# Red = Higher than predicted}
+    \AttributeTok{style =} \StringTok{"fixed"}\NormalTok{,    }
+    \AttributeTok{breaks =}\NormalTok{ breaks,    }
+    \AttributeTok{midpoint =} \DecValTok{0}\NormalTok{,}
+    \AttributeTok{title =} \StringTok{"Model Residuals"}\NormalTok{,}
+    \AttributeTok{colorNA =} \StringTok{"grey"}\NormalTok{,}
+    \AttributeTok{textNA =} \StringTok{"Missing"}\NormalTok{,}
+    \AttributeTok{alpha =} \FloatTok{0.75}
+\NormalTok{  ) }\SpecialCharTok{+}
+  \FunctionTok{tm\_borders}\NormalTok{(}\AttributeTok{col =} \StringTok{"white"}\NormalTok{, }\AttributeTok{lwd =} \FloatTok{0.1}\NormalTok{) }\SpecialCharTok{+} 
+  
+  \FunctionTok{tm\_layout}\NormalTok{(}
+    \CommentTok{\# Matches the Typology map title style exactly}
+    \AttributeTok{title =} \StringTok{"Spatial Pattern of Model Residuals"}\NormalTok{,}
+    \AttributeTok{title.position =} \FunctionTok{c}\NormalTok{(}\StringTok{"LEFT"}\NormalTok{, }\StringTok{"TOP"}\NormalTok{),}
+    \AttributeTok{title.size =} \FloatTok{1.4}\NormalTok{,}
+    \AttributeTok{title.fontface =} \StringTok{"bold"}\NormalTok{,}
+    \AttributeTok{title.bg.color =} \StringTok{"white"}\NormalTok{,}
+    \AttributeTok{title.bg.alpha =} \FloatTok{0.85}\NormalTok{, }\CommentTok{\# Keeps title readable over the map}
+
+    \AttributeTok{legend.outside =} \ConstantTok{TRUE}\NormalTok{,}
+    \AttributeTok{legend.outside.position =} \StringTok{"right"}\NormalTok{,}
+    \AttributeTok{legend.title.size =} \FloatTok{1.1}\NormalTok{,}
+    \AttributeTok{legend.title.fontface =} \StringTok{"bold"}\NormalTok{,}
+    \AttributeTok{legend.text.size =} \FloatTok{0.9}\NormalTok{,}
+
+    \AttributeTok{frame =} \ConstantTok{FALSE}\NormalTok{,}
+    \AttributeTok{inner.margins =} \FunctionTok{c}\NormalTok{(}\FloatTok{0.08}\NormalTok{, }\FloatTok{0.12}\NormalTok{, }\FloatTok{0.06}\NormalTok{, }\FloatTok{0.03}\NormalTok{), }
+    \AttributeTok{bg.color =} \StringTok{"white"}
+\NormalTok{  ) }\SpecialCharTok{+}
+  
+  \FunctionTok{tm\_credits}\NormalTok{(}
+    \StringTok{"Red = Higher than predicted births · Blue = Lower than predicted"}\NormalTok{,}
+    \AttributeTok{position =} \FunctionTok{c}\NormalTok{(}\StringTok{"LEFT"}\NormalTok{, }\StringTok{"BOTTOM"}\NormalTok{),}
+    \AttributeTok{size =} \FloatTok{0.75}\NormalTok{,}
+    \AttributeTok{color =} \StringTok{"grey30"}
+\NormalTok{  )}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## 
+## -- tmap v3 code detected -------------------------------------------------------
+## [v3->v4] `tm_fill()`: instead of `style = "fixed"`, use fill.scale =
+## `tm_scale_intervals()`.
+## i Migrate the argument(s) 'style', 'breaks', 'midpoint', 'palette' (rename to
+##   'values'), 'colorNA' (rename to 'value.na'), 'textNA' (rename to 'label.na')
+##   to 'tm_scale_intervals(<HERE>)'
+## For small multiples, specify a 'tm_scale_' for each multiple, and put them in a
+## list: 'fill'.scale = list(<scale1>, <scale2>, ...)'[v3->v4] `tm_fill()`: use `fill_alpha` instead of `alpha`.[v3->v4] `tm_fill()`: migrate the argument(s) related to the legend of the
+## visual variable `fill` namely 'title' to 'fill.legend = tm_legend(<HERE>)'[v3->v4] `tm_layout()`: use `tm_title()` instead of `tm_layout(title = )`[cols4all] color palettes: use palettes from the R package cols4all. Run
+## `cols4all::c4a_gui()` to explore them. The old palette name "-RdBu" is named
+## "rd_bu" (in long format "brewer.rd_bu")
+\end{verbatim}
+
+\pandocbounded{\includegraphics[keepaspectratio]{QM_Code_files/figure-latex/unnamed-chunk-40-1.pdf}}
+
+LME Map
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# 1. Extract the Residuals from your LME model}
+\NormalTok{master\_london\_sf}\SpecialCharTok{$}\NormalTok{lme\_residuals }\OtherTok{\textless{}{-}} \FunctionTok{residuals}\NormalTok{(lme\_final)}
+
+\CommentTok{\# 2. Create a Binary Factor: Where is fertility HIGHER than the model predicted?}
+\NormalTok{london\_lme\_binary }\OtherTok{\textless{}{-}}\NormalTok{ master\_london\_sf }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{mutate}\NormalTok{(}\AttributeTok{status =} \FunctionTok{ifelse}\NormalTok{(lme\_residuals }\SpecialCharTok{\textgreater{}} \DecValTok{0}\NormalTok{, }\StringTok{"More Babies than Expected"}\NormalTok{, }\StringTok{"Fewer Babies than Expected"}\NormalTok{)) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{st\_transform}\NormalTok{(}\AttributeTok{crs =} \DecValTok{3857}\NormalTok{)}
+
+\CommentTok{\# 3. Plotting the LME Residual Map}
+\FunctionTok{ggplot}\NormalTok{() }\SpecialCharTok{+}
+  \FunctionTok{annotation\_map\_tile}\NormalTok{(}\AttributeTok{type =} \StringTok{"cartolight"}\NormalTok{, }\AttributeTok{zoom =} \DecValTok{11}\NormalTok{, }\AttributeTok{progress =} \StringTok{"none"}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{layer\_spatial}\NormalTok{(}\AttributeTok{data =}\NormalTok{ london\_lme\_binary, }\FunctionTok{aes}\NormalTok{(}\AttributeTok{fill =}\NormalTok{ status), }
+                \AttributeTok{color =} \StringTok{"white"}\NormalTok{, }\AttributeTok{linewidth =} \FloatTok{0.05}\NormalTok{, }\AttributeTok{alpha =} \FloatTok{0.5}\NormalTok{) }\SpecialCharTok{+} 
+  \FunctionTok{scale\_fill\_manual}\NormalTok{(}
+    \AttributeTok{values =} \FunctionTok{c}\NormalTok{(}\StringTok{"More Babies than Expected"} \OtherTok{=} \StringTok{"darkorchid"}\NormalTok{, }
+               \StringTok{"Fewer Babies than Expected"} \OtherTok{=} \StringTok{"orchid"}\NormalTok{),}
+    \AttributeTok{name =} \StringTok{"LME Prediction"}
+\NormalTok{  ) }\SpecialCharTok{+}
+  \FunctionTok{theme\_minimal}\NormalTok{() }\SpecialCharTok{+}
+  \FunctionTok{theme}\NormalTok{(}
+    \AttributeTok{axis.text =} \FunctionTok{element\_blank}\NormalTok{(),}
+    \AttributeTok{axis.title =} \FunctionTok{element\_blank}\NormalTok{(),}
+    \AttributeTok{panel.grid =} \FunctionTok{element\_blank}\NormalTok{(),}
+    \AttributeTok{plot.title =} \FunctionTok{element\_text}\NormalTok{(}\AttributeTok{face =} \StringTok{"bold"}\NormalTok{, }\AttributeTok{size =} \DecValTok{16}\NormalTok{),}
+    \AttributeTok{legend.position =} \StringTok{"right"}
+\NormalTok{  ) }\SpecialCharTok{+}
+  \FunctionTok{labs}\NormalTok{(}
+    \AttributeTok{title =} \StringTok{"LME Model: Where the \textquotesingle{}Squeeze\textquotesingle{} Fails"}\NormalTok{,}
+    \AttributeTok{subtitle =} \StringTok{"Orangered areas defy the model (Higher fertility despite housing pressure)"}
+\NormalTok{  )}
+\end{Highlighting}
+\end{Shaded}
+
+\pandocbounded{\includegraphics[keepaspectratio]{QM_Code_files/figure-latex/unnamed-chunk-41-1.pdf}}
+
+Fertility Map
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{library}\NormalTok{(ggplot2)}
+\FunctionTok{library}\NormalTok{(ggspatial)}
+\FunctionTok{library}\NormalTok{(sf)}
+
+\CommentTok{\# 1. Create the Binary Factor}
+\CommentTok{\# Using the London Mean (80.48) as the threshold}
+\NormalTok{london\_binary }\OtherTok{\textless{}{-}}\NormalTok{ master\_london\_sf }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{mutate}\NormalTok{(}\AttributeTok{status =} \FunctionTok{ifelse}\NormalTok{(log\_fertility }\SpecialCharTok{\textgreater{}} \FunctionTok{log10}\NormalTok{(}\FloatTok{80.48}\NormalTok{), }\StringTok{"Above Average"}\NormalTok{, }\StringTok{"Below Average"}\NormalTok{)) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{st\_transform}\NormalTok{(}\AttributeTok{crs =} \DecValTok{3857}\NormalTok{)}
+
+\CommentTok{\# 2. Plotting with a high{-}contrast scheme}
+\FunctionTok{ggplot}\NormalTok{() }\SpecialCharTok{+}
+  \FunctionTok{annotation\_map\_tile}\NormalTok{(}\AttributeTok{type =} \StringTok{"cartolight"}\NormalTok{, }\AttributeTok{zoom =} \DecValTok{11}\NormalTok{, }\AttributeTok{progress =} \StringTok{"none"}\NormalTok{) }\SpecialCharTok{+}
+  
+  \FunctionTok{layer\_spatial}\NormalTok{(}\AttributeTok{data =}\NormalTok{ london\_binary, }\FunctionTok{aes}\NormalTok{(}\AttributeTok{fill =}\NormalTok{ status), }
+                \AttributeTok{color =} \StringTok{"white"}\NormalTok{, }\AttributeTok{linewidth =} \FloatTok{0.05}\NormalTok{, }\AttributeTok{alpha =} \FloatTok{0.5}\NormalTok{) }\SpecialCharTok{+} 
+  
+  \CommentTok{\# Sharp contrast: High{-}fertility Red vs. Low{-}fertility Blue}
+  \FunctionTok{scale\_fill\_manual}\NormalTok{(}
+    \AttributeTok{values =} \FunctionTok{c}\NormalTok{(}\StringTok{"Above Average"} \OtherTok{=} \StringTok{"orangered"}\NormalTok{, }\StringTok{"Below Average"} \OtherTok{=} \StringTok{"lightsalmon"}\NormalTok{),}
+    \AttributeTok{name =} \StringTok{"Fertility Status"}
+\NormalTok{  ) }\SpecialCharTok{+}
+  
+  \FunctionTok{theme\_minimal}\NormalTok{() }\SpecialCharTok{+}
+  \FunctionTok{theme}\NormalTok{(}
+    \AttributeTok{axis.text =} \FunctionTok{element\_blank}\NormalTok{(),}
+    \AttributeTok{axis.title =} \FunctionTok{element\_blank}\NormalTok{(),}
+    \AttributeTok{panel.grid =} \FunctionTok{element\_blank}\NormalTok{(),}
+    \AttributeTok{plot.title =} \FunctionTok{element\_text}\NormalTok{(}\AttributeTok{face =} \StringTok{"bold"}\NormalTok{, }\AttributeTok{size =} \DecValTok{16}\NormalTok{),}
+    \AttributeTok{legend.position =} \StringTok{"right"}
+\NormalTok{  ) }\SpecialCharTok{+}
+  \FunctionTok{labs}\NormalTok{(}
+    \AttributeTok{title =} \StringTok{"London\textquotesingle{}s Fertility Divide"}\NormalTok{,}
+    \AttributeTok{subtitle =} \StringTok{"Binary classification based on the city{-}wide mean (80.5)"}
+\NormalTok{  )}
+\end{Highlighting}
+\end{Shaded}
+
+\pandocbounded{\includegraphics[keepaspectratio]{QM_Code_files/figure-latex/unnamed-chunk-42-1.pdf}}
+
+Housing map
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# 1. Create the Binary Factor for Housing}
+\NormalTok{price\_mean }\OtherTok{\textless{}{-}} \FunctionTok{mean}\NormalTok{(master\_london\_sf}\SpecialCharTok{$}\NormalTok{log\_housing\_cost, }\AttributeTok{na.rm =} \ConstantTok{TRUE}\NormalTok{)}
+
+\NormalTok{london\_price\_binary }\OtherTok{\textless{}{-}}\NormalTok{ master\_london\_sf }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{mutate}\NormalTok{(}\AttributeTok{status =} \FunctionTok{ifelse}\NormalTok{(log\_housing\_cost }\SpecialCharTok{\textgreater{}}\NormalTok{ price\_mean, }\StringTok{"High Cost"}\NormalTok{, }\StringTok{"Low Cost"}\NormalTok{)) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{st\_transform}\NormalTok{(}\AttributeTok{crs =} \DecValTok{3857}\NormalTok{)}
+
+\CommentTok{\# 2. Plotting Housing Cost}
+\FunctionTok{ggplot}\NormalTok{() }\SpecialCharTok{+}
+  \FunctionTok{annotation\_map\_tile}\NormalTok{(}\AttributeTok{type =} \StringTok{"cartolight"}\NormalTok{, }\AttributeTok{zoom =} \DecValTok{11}\NormalTok{, }\AttributeTok{progress =} \StringTok{"none"}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{layer\_spatial}\NormalTok{(}\AttributeTok{data =}\NormalTok{ london\_price\_binary, }\FunctionTok{aes}\NormalTok{(}\AttributeTok{fill =}\NormalTok{ status), }
+                \AttributeTok{color =} \StringTok{"white"}\NormalTok{, }\AttributeTok{linewidth =} \FloatTok{0.05}\NormalTok{, }\AttributeTok{alpha =} \FloatTok{0.5}\NormalTok{) }\SpecialCharTok{+} 
+  \FunctionTok{scale\_fill\_manual}\NormalTok{(}
+    \AttributeTok{values =} \FunctionTok{c}\NormalTok{(}\StringTok{"High Cost"} \OtherTok{=} \StringTok{"maroon"}\NormalTok{, }\StringTok{"Low Cost"} \OtherTok{=} \StringTok{"lightpink"}\NormalTok{),}
+    \AttributeTok{name =} \StringTok{"Housing Price"}
+\NormalTok{  ) }\SpecialCharTok{+}
+  \FunctionTok{theme\_minimal}\NormalTok{() }\SpecialCharTok{+}
+  \FunctionTok{theme}\NormalTok{(}
+    \AttributeTok{axis.text =} \FunctionTok{element\_blank}\NormalTok{(),}
+    \AttributeTok{axis.title =} \FunctionTok{element\_blank}\NormalTok{(),}
+    \AttributeTok{panel.grid =} \FunctionTok{element\_blank}\NormalTok{(),}
+    \AttributeTok{plot.title =} \FunctionTok{element\_text}\NormalTok{(}\AttributeTok{face =} \StringTok{"bold"}\NormalTok{, }\AttributeTok{size =} \DecValTok{16}\NormalTok{),}
+    \AttributeTok{legend.position =} \StringTok{"right"}
+\NormalTok{  ) }\SpecialCharTok{+}
+  \FunctionTok{labs}\NormalTok{(}
+    \AttributeTok{title =} \StringTok{"London Housing Cost Divide"}\NormalTok{,}
+    \AttributeTok{subtitle =} \StringTok{"Binary classification based on city{-}wide mean price"}
+\NormalTok{  )}
+\end{Highlighting}
+\end{Shaded}
+
+\pandocbounded{\includegraphics[keepaspectratio]{QM_Code_files/figure-latex/unnamed-chunk-43-1.pdf}}
+
+Room Size Map
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# 1. Create the Binary Factor using your h\_pct\_above2 column}
+\CommentTok{\# We use a threshold of 0.8 (80\%) to define \textquotesingle{}High Room Count\textquotesingle{} areas}
+\NormalTok{london\_dwell\_binary }\OtherTok{\textless{}{-}}\NormalTok{ master\_london\_sf }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{mutate}\NormalTok{(}\AttributeTok{status =} \FunctionTok{ifelse}\NormalTok{(h\_pct\_above2 }\SpecialCharTok{\textgreater{}} \FloatTok{0.8}\NormalTok{, }\StringTok{"Roomy Homes"}\NormalTok{, }\StringTok{"Small Homes"}\NormalTok{)) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{st\_transform}\NormalTok{(}\AttributeTok{crs =} \DecValTok{3857}\NormalTok{)}
+
+\CommentTok{\# 2. Plotting Dwellings}
+\FunctionTok{ggplot}\NormalTok{() }\SpecialCharTok{+}
+  \FunctionTok{annotation\_map\_tile}\NormalTok{(}\AttributeTok{type =} \StringTok{"cartolight"}\NormalTok{, }\AttributeTok{zoom =} \DecValTok{11}\NormalTok{, }\AttributeTok{progress =} \StringTok{"none"}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{layer\_spatial}\NormalTok{(}\AttributeTok{data =}\NormalTok{ london\_dwell\_binary, }\FunctionTok{aes}\NormalTok{(}\AttributeTok{fill =}\NormalTok{ status), }
+                \AttributeTok{color =} \StringTok{"white"}\NormalTok{, }\AttributeTok{linewidth =} \FloatTok{0.05}\NormalTok{, }\AttributeTok{alpha =} \FloatTok{0.5}\NormalTok{) }\SpecialCharTok{+} 
+  \FunctionTok{scale\_fill\_manual}\NormalTok{(}
+    \AttributeTok{values =} \FunctionTok{c}\NormalTok{(}\StringTok{"Roomy Homes"} \OtherTok{=} \StringTok{"darkblue"}\NormalTok{, }\StringTok{"Small Homes"} \OtherTok{=} \StringTok{"cornflowerblue"}\NormalTok{),}
+    \AttributeTok{name =} \StringTok{"Space Availability"}
+\NormalTok{  ) }\SpecialCharTok{+}
+  \FunctionTok{theme\_minimal}\NormalTok{() }\SpecialCharTok{+}
+  \FunctionTok{theme}\NormalTok{(}
+    \AttributeTok{axis.text =} \FunctionTok{element\_blank}\NormalTok{(),}
+    \AttributeTok{axis.title =} \FunctionTok{element\_blank}\NormalTok{(),}
+    \AttributeTok{panel.grid =} \FunctionTok{element\_blank}\NormalTok{(),}
+    \AttributeTok{plot.title =} \FunctionTok{element\_text}\NormalTok{(}\AttributeTok{face =} \StringTok{"bold"}\NormalTok{, }\AttributeTok{size =} \DecValTok{16}\NormalTok{),}
+    \AttributeTok{legend.position =} \StringTok{"right"}
+\NormalTok{  ) }\SpecialCharTok{+}
+  \FunctionTok{labs}\NormalTok{(}
+    \AttributeTok{title =} \StringTok{"The London Space Squeeze"}\NormalTok{,}
+    \AttributeTok{subtitle =} \StringTok{"Binary classification of dwellings with \textgreater{}2 rooms"}
+\NormalTok{  )}
+\end{Highlighting}
+\end{Shaded}
+
+\pandocbounded{\includegraphics[keepaspectratio]{QM_Code_files/figure-latex/unnamed-chunk-44-1.pdf}}
+
+\end{document}
